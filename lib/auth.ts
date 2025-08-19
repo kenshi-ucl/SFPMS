@@ -14,6 +14,36 @@ const users: Record<string, AuthUser & { password: string }> = {
 		lastLogin: new Date().toISOString(),
 		password: "Password!2345",
 	},
+	"deptadmin@university.edu": {
+		userId: "u_dept_admin",
+		username: "deptadmin",
+		email: "deptadmin@university.edu",
+		role: "dept_admin",
+		status: "active",
+		lastLogin: new Date().toISOString(),
+		password: "Password!2345",
+		departmentId: "dept_cs",
+	},
+	"faculty@university.edu": {
+		userId: "u_faculty",
+		username: "jsmith",
+		email: "faculty@university.edu",
+		role: "faculty",
+		status: "active",
+		lastLogin: new Date().toISOString(),
+		password: "Password!2345",
+		departmentId: "dept_cs",
+	},
+	"student@university.edu": {
+		userId: "u_student",
+		username: "jdoe",
+		email: "student@university.edu",
+		role: "student",
+		status: "active",
+		lastLogin: new Date().toISOString(),
+		password: "Password!2345",
+		departmentId: "dept_cs",
+	},
 }
 
 const activeSessions = new Map<string, Session>()

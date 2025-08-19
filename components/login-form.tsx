@@ -130,7 +130,11 @@ export function LoginForm({ onLogin }: LoginFormProps) {
                 {isLoading ? "Signing in..." : "Sign In"}
               </Button>
               <div className="mt-2 text-center text-xs text-gray-600">
-                Demo: admin@university.edu / Password!2345
+                Demo accounts:<br />
+                Admin: admin@university.edu / Password!2345<br />
+                Dept Admin: deptadmin@university.edu / Password!2345<br />
+                Faculty: faculty@university.edu / Password!2345<br />
+                Student: student@university.edu / Password!2345
               </div>
             </form>
           ) : (

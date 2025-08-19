@@ -28,63 +28,55 @@ import {
 interface AppSidebarProps {
   activeSection: string
   onSectionChange: (section: string) => void
+  currentUser?: { username: string; role: string }
 }
 
-export function AppSidebar({ activeSection, onSectionChange }: AppSidebarProps) {
-  const navigationItems = [
-    {
-      title: "Dashboard",
-      icon: LayoutDashboard,
-      id: "dashboard",
-    },
-    {
-      title: "Users",
-      icon: Users,
-      id: "users",
-    },
-    {
-      title: "Courses",
-      icon: BookOpen,
-      id: "courses",
-    },
-    {
-      title: "Students",
-      icon: GraduationCap,
-      id: "students",
-    },
-    {
-      title: "Faculty",
-      icon: UserCheck,
-      id: "faculty",
-    },
-    {
-      title: "Departments",
-      icon: Building2,
-      id: "departments",
-    },
-    {
-      title: "Academic Years",
-      icon: Calendar,
-      id: "academic-years",
-    },
-    {
-      title: "Audit Log",
-      icon: FileText,
-      id: "audit-log",
-    },
+export function AppSidebar({ activeSection, onSectionChange, currentUser }: AppSidebarProps) {
+  const role = currentUser?.role || "admin"
+
+  const baseNav = [
+    { title: "Dashboard", icon: LayoutDashboard, id: "dashboard" },
   ]
 
+  const adminNav = [
+    { title: "Users", icon: Users, id: "users" },
+    { title: "Courses", icon: BookOpen, id: "courses" },
+    { title: "Students", icon: GraduationCap, id: "students" },
+    { title: "Faculty", icon: UserCheck, id: "faculty" },
+    { title: "Departments", icon: Building2, id: "departments" },
+    { title: "Academic Years", icon: Calendar, id: "academic-years" },
+    { title: "Audit Log", icon: FileText, id: "audit-log" },
+  ]
+
+  const deptAdminNav = [
+    { title: "Dashboard", icon: LayoutDashboard, id: "dashboard" },
+    { title: "Courses", icon: BookOpen, id: "courses" },
+    { title: "Students", icon: GraduationCap, id: "students" },
+    { title: "Faculty", icon: UserCheck, id: "faculty" },
+    { title: "Departments", icon: Building2, id: "departments" },
+    { title: "Academic Years", icon: Calendar, id: "academic-years" },
+  ]
+
+  const facultyNav = [
+    { title: "Home", icon: LayoutDashboard, id: "faculty-portal" },
+  ]
+
+  const studentNav = [
+    { title: "Home", icon: LayoutDashboard, id: "student-portal" },
+  ]
+
+  const navigationItems =
+    role === "admin"
+      ? adminNav
+      : role === "dept_admin"
+      ? deptAdminNav
+      : role === "faculty"
+      ? facultyNav
+      : studentNav
+
   const accountItems = [
-    {
-      title: "My Profile",
-      icon: User,
-      id: "profile",
-    },
-    {
-      title: "Settings",
-      icon: Settings,
-      id: "settings",
-    },
+    { title: "My Profile", icon: User, id: "profile" },
+    { title: "Settings", icon: Settings, id: "settings" },
   ]
 
   return (
@@ -134,7 +126,7 @@ export function AppSidebar({ activeSection, onSectionChange }: AppSidebarProps) 
       </SidebarContent>
       <SidebarFooter>
         <div className="px-4 py-2 text-xs text-gray-500">
-          <div>Logged in as: Administrator</div>
+          <div>Logged in as: {currentUser ? currentUser.username : "Administrator"} ({role})</div>
           <div>Academic Year: 2024-2025</div>
         </div>
       </SidebarFooter>
