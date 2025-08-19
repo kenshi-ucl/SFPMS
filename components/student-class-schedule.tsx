@@ -282,27 +282,24 @@ export function StudentClassSchedule() {
 
       {/* Weekly Schedule Grid */}
       <Card>
-        <CardHeader>
-          <CardTitle>Weekly Schedule</CardTitle>
-        </CardHeader>
         <CardContent className="p-0">
-          <div className="overflow-x-auto">
-            <table className="w-full border-collapse">
+          <div className="w-full">
+            <table className="w-full border-collapse table-fixed">
               <thead>
                 <tr className="bg-gray-100">
-                  <th className="border border-gray-300 p-3 text-center font-bold min-w-[120px]">Time</th>
-                  <th className="border border-gray-300 p-3 text-center font-bold min-w-[180px]">Monday</th>
-                  <th className="border border-gray-300 p-3 text-center font-bold min-w-[180px]">Tuesday</th>
-                  <th className="border border-gray-300 p-3 text-center font-bold min-w-[180px]">Wednesday</th>
-                  <th className="border border-gray-300 p-3 text-center font-bold min-w-[180px]">Thursday</th>
-                  <th className="border border-gray-300 p-3 text-center font-bold min-w-[180px]">Friday</th>
-                  <th className="border border-gray-300 p-3 text-center font-bold min-w-[180px]">Saturday</th>
+                  <th className="border border-gray-300 p-2 text-center font-bold w-20">Time</th>
+                  <th className="border border-gray-300 p-2 text-center font-bold">Monday</th>
+                  <th className="border border-gray-300 p-2 text-center font-bold">Tuesday</th>
+                  <th className="border border-gray-300 p-2 text-center font-bold">Wednesday</th>
+                  <th className="border border-gray-300 p-2 text-center font-bold">Thursday</th>
+                  <th className="border border-gray-300 p-2 text-center font-bold">Friday</th>
+                  <th className="border border-gray-300 p-2 text-center font-bold">Saturday</th>
                 </tr>
               </thead>
               <tbody>
                 {timeSlots.map(timeSlot => (
                   <tr key={timeSlot}>
-                    <td className="border border-gray-300 p-3 text-center text-sm font-medium bg-gray-50 align-top">
+                    <td className="border border-gray-300 p-2 text-center text-xs font-medium bg-gray-50 align-top w-20">
                       {timeSlot}
                     </td>
                     {days.slice(0, 6).map(day => {
@@ -319,21 +316,21 @@ export function StudentClassSchedule() {
                       })
                       
                       return (
-                        <td key={`${day}-${timeSlot}`} className="border border-gray-300 p-2 align-top" style={{ minHeight: '80px' }}>
+                        <td key={`${day}-${timeSlot}`} className="border border-gray-300 p-1 align-top" style={{ minHeight: '70px' }}>
                           {classAtTime && (
-                            <div className={`${getSubjectColor(classAtTime.subjectCode)} rounded-lg text-gray-800 p-3 min-h-[70px] flex flex-col justify-between`}>
+                            <div className={`${getSubjectColor(classAtTime.subjectCode)} rounded-lg text-gray-800 p-2 min-h-[60px] flex flex-col justify-between text-xs`}>
                               <div>
-                                <div className="font-bold text-sm mb-1">{classAtTime.subjectCode}</div>
-                                <div className="text-xs mb-1">{classAtTime.subjectName}</div>
+                                <div className="font-bold text-xs mb-1">{classAtTime.subjectCode}</div>
+                                <div className="text-xs mb-1 leading-tight">{classAtTime.subjectName}</div>
                               </div>
                               <div className="text-xs">
                                 <div className="flex items-center gap-1 mb-1">
-                                  <MapPin className="w-3 h-3" />
-                                  <span>{classAtTime.building} {classAtTime.room}</span>
+                                  <MapPin className="w-3 h-3 flex-shrink-0" />
+                                  <span className="truncate">{classAtTime.building} {classAtTime.room}</span>
                                 </div>
                                 <div className="flex items-center gap-1">
-                                  <User className="w-3 h-3" />
-                                  <span>BSIT 3-{classAtTime.section}</span>
+                                  <User className="w-3 h-3 flex-shrink-0" />
+                                  <span className="truncate">BSIT 3-{classAtTime.section}</span>
                                 </div>
                               </div>
                             </div>
