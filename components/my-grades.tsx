@@ -320,38 +320,38 @@ export function MyGrades() {
         </CardHeader>
         <CardContent>
           <div className="overflow-x-auto">
-            <Table>
+            <Table className="border-collapse border border-gray-300">
               <TableHeader>
                 <TableRow className="bg-gray-50">
-                  <TableHead className="font-bold">#</TableHead>
-                  <TableHead className="font-bold">Subject Code</TableHead>
-                  <TableHead className="font-bold">Description</TableHead>
-                  <TableHead className="font-bold">Faculty Name</TableHead>
-                  <TableHead className="font-bold">Units</TableHead>
-                  <TableHead className="font-bold">Section</TableHead>
-                  <TableHead className="font-bold">Midterm</TableHead>
-                  <TableHead className="font-bold">Final</TableHead>
-                  <TableHead className="font-bold">Final Grade</TableHead>
-                  <TableHead className="font-bold">Grade Status</TableHead>
+                  <TableHead className="font-bold border border-gray-300 text-center">#</TableHead>
+                  <TableHead className="font-bold border border-gray-300 text-center">Subject Code</TableHead>
+                  <TableHead className="font-bold border border-gray-300 text-center">Description</TableHead>
+                  <TableHead className="font-bold border border-gray-300 text-center">Faculty Name</TableHead>
+                  <TableHead className="font-bold border border-gray-300 text-center">Units</TableHead>
+                  <TableHead className="font-bold border border-gray-300 text-center">Section</TableHead>
+                  <TableHead className="font-bold border border-gray-300 text-center">Midterm</TableHead>
+                  <TableHead className="font-bold border border-gray-300 text-center">Final</TableHead>
+                  <TableHead className="font-bold border border-gray-300 text-center">Final Grade</TableHead>
+                  <TableHead className="font-bold border border-gray-300 text-center">Grade Status</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {filteredGrades.map((grade, index) => (
                   <TableRow key={grade.id} className={index % 2 === 0 ? "bg-blue-50" : "bg-white"}>
-                    <TableCell className="font-medium">{index + 1}</TableCell>
-                    <TableCell className="font-medium text-blue-600">{grade.subjectCode}</TableCell>
-                    <TableCell className="max-w-xs">
+                    <TableCell className="font-medium border border-gray-300 text-center">{index + 1}</TableCell>
+                    <TableCell className="font-medium text-blue-600 border border-gray-300 text-center">{grade.subjectCode}</TableCell>
+                    <TableCell className="max-w-xs border border-gray-300 px-2">
                       <div className="text-sm">
                         {grade.description}
                       </div>
                     </TableCell>
-                    <TableCell className="text-sm">{grade.facultyName}</TableCell>
-                    <TableCell className="text-center font-medium">{grade.units}</TableCell>
-                    <TableCell className="text-sm">{grade.section}</TableCell>
-                    <TableCell className="text-center font-medium">{grade.midterm.toFixed(1)}</TableCell>
-                    <TableCell className="text-center font-medium">{grade.final.toFixed(1)}</TableCell>
-                    <TableCell className="text-center font-bold text-lg">{grade.finalGrade.toFixed(1)}</TableCell>
-                    <TableCell>
+                    <TableCell className="text-sm border border-gray-300 px-2">{grade.facultyName}</TableCell>
+                    <TableCell className="text-center font-medium border border-gray-300">{grade.units}</TableCell>
+                    <TableCell className="text-sm border border-gray-300 text-center">{grade.section}</TableCell>
+                    <TableCell className="text-center font-medium border border-gray-300">{grade.midterm.toFixed(1)}</TableCell>
+                    <TableCell className="text-center font-medium border border-gray-300">{grade.final.toFixed(1)}</TableCell>
+                    <TableCell className="text-center font-bold text-lg border border-gray-300">{grade.finalGrade.toFixed(1)}</TableCell>
+                    <TableCell className="border border-gray-300 text-center">
                       <Badge className={getGradeStatusColor(grade.gradeStatus)} variant="outline">
                         {grade.gradeStatus}
                       </Badge>

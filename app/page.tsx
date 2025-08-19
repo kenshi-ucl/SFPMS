@@ -27,6 +27,10 @@ import { FacultyCourses } from "@/components/faculty-courses"
 import { FacultySchedule } from "@/components/faculty-schedule"
 import { FacultyStudentGrades } from "@/components/faculty-student-grades"
 import { FacultyAttendance } from "@/components/faculty-attendance"
+import { StudentClassSchedule } from "@/components/student-class-schedule"
+import { StudentCourses } from "@/components/student-courses"
+import { StudentAttendance } from "@/components/student-attendance"
+import { StudentAcademicProgress } from "@/components/student-academic-progress"
 
 export default function Home() {
   const [isLoggedIn, setIsLoggedIn] = useState(false)
@@ -115,10 +119,10 @@ export default function Home() {
     if (role === "student") {
       switch (activeSection) {
         case "my-grades": return <MyGrades />
-        case "class-schedule": return <div className="p-6"><h1 className="text-3xl font-bold">Class Schedule</h1><p>Your class schedule coming soon...</p></div>
-        case "my-courses": return <div className="p-6"><h1 className="text-3xl font-bold">My Courses</h1><p>Your enrolled courses coming soon...</p></div>
-        case "my-attendance": return <div className="p-6"><h1 className="text-3xl font-bold">My Attendance</h1><p>Your attendance record coming soon...</p></div>
-        case "academic-progress": return <div className="p-6"><h1 className="text-3xl font-bold">Academic Progress</h1><p>Your academic progress tracking coming soon...</p></div>
+        case "class-schedule": return <StudentClassSchedule />
+        case "my-courses": return <StudentCourses />
+        case "my-attendance": return <StudentAttendance />
+        case "academic-progress": return <StudentAcademicProgress />
         case "settings": return <UserProfile />
         default: return <Dashboard />
       }
