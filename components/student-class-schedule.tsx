@@ -21,131 +21,150 @@ interface ClassScheduleItem {
   building: string
   classType: "Lecture" | "Laboratory" | "Seminar" | "Tutorial"
   credits: number
-  color: string
+  units: number
+  lec: number
+  lab: number
+  schedule: string
+  section: string
 }
 
 const mockSchedule: ClassScheduleItem[] = [
   {
     id: "1",
-    subjectCode: "BRIDG 001",
-    subjectName: "Bridging Subject 1 (Algebra, Trigo, Calculus 1)",
-    facultyName: "PIA, GRACEFYL JOY LUMINGKIT",
+    subjectCode: "IT 370",
+    subjectName: "Advanced Networking",
+    facultyName: "Prof. Smith",
     day: "Monday",
-    timeStart: "08:00",
-    timeEnd: "09:30",
-    room: "Room 101",
-    building: "Engineering Building",
+    timeStart: "09:30",
+    timeEnd: "11:00",
+    room: "101",
+    building: "CB",
     classType: "Lecture",
     credits: 3,
-    color: "bg-blue-100 border-blue-300"
+    units: 3,
+    lec: 2,
+    lab: 1,
+    schedule: "M-W: 9:30AM-11:00AM",
+    section: "A"
   },
   {
     id: "2",
-    subjectCode: "GE 104",
-    subjectName: "Mathematics in the Modern World",
-    facultyName: "PANIZA, MARIA LEILA SOLIS",
-    day: "Monday",
-    timeStart: "10:00",
-    timeEnd: "11:30",
-    room: "Room 205",
-    building: "Main Building",
+    subjectCode: "IT 372",
+    subjectName: "Information Assurance and Security 1 (with CISSP-Part 1)",
+    facultyName: "Prof. Johnson",
+    day: "Tuesday",
+    timeStart: "10:30",
+    timeEnd: "12:00",
+    room: "102",
+    building: "CB",
     classType: "Lecture",
     credits: 3,
-    color: "bg-green-100 border-green-300"
+    units: 3,
+    lec: 2,
+    lab: 1,
+    schedule: "T-Th: 10:30AM-12:00PM",
+    section: "B"
   },
   {
     id: "3",
-    subjectCode: "IT 170",
-    subjectName: "Computer Fundamentals and Operations",
-    facultyName: "LUCINO, SHIELA MAY FETALCURIN",
-    day: "Monday",
-    timeStart: "13:00",
-    timeEnd: "14:30",
-    room: "Computer Lab 1",
-    building: "IT Building",
+    subjectCode: "IT 371.1",
+    subjectName: "Systems Integration and Technologies 2",
+    facultyName: "Prof. Brown",
+    day: "Wednesday",
+    timeStart: "08:30",
+    timeEnd: "11:30",
+    room: "201",
+    building: "CB",
     classType: "Laboratory",
     credits: 3,
-    color: "bg-purple-100 border-purple-300"
+    units: 3,
+    lec: 2,
+    lab: 1,
+    schedule: "W: 8:30AM-11:30AM",
+    section: "A"
   },
   {
     id: "4",
-    subjectCode: "IT 171",
-    subjectName: "Fundamentals of Programming and Problem Solving 1",
-    facultyName: "PENAMANTE, JOSHUA ANUB",
-    day: "Tuesday",
-    timeStart: "08:00",
-    timeEnd: "09:30",
-    room: "Computer Lab 2",
-    building: "IT Building",
+    subjectCode: "IT 373-R1.2",
+    subjectName: "Platform Technologies",
+    facultyName: "Prof. Davis",
+    day: "Thursday",
+    timeStart: "09:30",
+    timeEnd: "12:30",
+    room: "103",
+    building: "CB",
     classType: "Laboratory",
     credits: 3,
-    color: "bg-orange-100 border-orange-300"
+    units: 3,
+    lec: 2,
+    lab: 1,
+    schedule: "Th: 9:30AM-12:30PM",
+    section: "B"
   },
   {
     id: "5",
-    subjectCode: "GE 105",
-    subjectName: "Purposive Communication",
-    facultyName: "TITULAR, BRISBANE QUIROG",
-    day: "Tuesday",
-    timeStart: "10:00",
-    timeEnd: "11:30",
-    room: "Room 303",
-    building: "Liberal Arts Building",
+    subjectCode: "IT 371",
+    subjectName: "Social Issues and Professional Practice",
+    facultyName: "Prof. Wilson",
+    day: "Friday",
+    timeStart: "10:30",
+    timeEnd: "12:00",
+    room: "104",
+    building: "CB",
     classType: "Lecture",
     credits: 3,
-    color: "bg-pink-100 border-pink-300"
+    units: 3,
+    lec: 3,
+    lab: 0,
+    schedule: "F: 10:30AM-12:00PM",
+    section: "A"
   },
   {
     id: "6",
-    subjectCode: "NSTP 1",
-    subjectName: "National Service Training Program 1",
-    facultyName: "COORDINATOR, NSTP",
-    day: "Wednesday",
-    timeStart: "07:00",
-    timeEnd: "10:00",
-    room: "Field Area",
-    building: "Campus Grounds",
-    classType: "Seminar",
-    credits: 3,
-    color: "bg-yellow-100 border-yellow-300"
+    subjectCode: "IT 372-R1.2",
+    subjectName: "Platform Technologies Lab",
+    facultyName: "Prof. Davis",
+    day: "Tuesday",
+    timeStart: "15:30",
+    timeEnd: "18:30",
+    room: "301",
+    building: "CB",
+    classType: "Laboratory",
+    credits: 0,
+    units: 3,
+    lec: 0,
+    lab: 3,
+    schedule: "T: 3:30PM-6:30PM",
+    section: "A"
   },
   {
     id: "7",
-    subjectCode: "PE 1",
-    subjectName: "Physical Education 1",
-    facultyName: "INSTRUCTOR, PE",
-    day: "Thursday",
-    timeStart: "14:00",
-    timeEnd: "16:00",
-    room: "Gymnasium",
-    building: "Sports Complex",
-    classType: "Tutorial",
-    credits: 2,
-    color: "bg-red-100 border-red-300"
-  },
-  {
-    id: "8",
-    subjectCode: "MATH 171",
-    subjectName: "Discrete Math",
-    facultyName: "SARIN, JAYSON RASOURIO",
+    subjectCode: "IT 374-R1.3",
+    subjectName: "Advanced Database Lab",
+    facultyName: "Prof. Taylor",
     day: "Friday",
-    timeStart: "08:00",
-    timeEnd: "09:30",
-    room: "Room 202",
-    building: "Engineering Building",
-    classType: "Lecture",
-    credits: 3,
-    color: "bg-indigo-100 border-indigo-300"
-  },
+    timeStart: "15:30",
+    timeEnd: "18:30",
+    room: "302",
+    building: "CB",
+    classType: "Laboratory",
+    credits: 0,
+    units: 3,
+    lec: 0,
+    lab: 3,
+    schedule: "F: 3:30PM-6:30PM",
+    section: "B"
+  }
 ]
 
 const timeSlots = [
-  "07:00", "07:30", "08:00", "08:30", "09:00", "09:30", "10:00", "10:30",
-  "11:00", "11:30", "12:00", "12:30", "13:00", "13:30", "14:00", "14:30",
-  "15:00", "15:30", "16:00", "16:30", "17:00", "17:30", "18:00"
+  "07:30 AM", "08:00 AM", "08:30 AM", "09:00 AM", "09:30 AM", "10:00 AM", "10:30 AM", "11:00 AM",
+  "11:30 AM", "12:00 PM", "12:30 PM", "01:00 PM", "01:30 PM", "02:00 PM", "02:30 PM", "03:00 PM",
+  "03:30 PM", "04:00 PM", "04:30 PM", "05:00 PM", "05:30 PM", "06:00 PM", "06:30 PM", "07:00 PM",
+  "07:30 PM", "08:00 PM", "08:30 PM", "09:00 PM", "09:30 PM"
 ]
 
-const days = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"]
+const days = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
 
 export function StudentClassSchedule() {
   const [schedule] = useState<ClassScheduleItem[]>(mockSchedule)
@@ -167,6 +186,20 @@ export function StudentClassSchedule() {
     }
   }
 
+  const getSubjectColor = (subjectCode: string) => {
+    const colors = [
+      "bg-green-400",
+      "bg-blue-400", 
+      "bg-purple-400",
+      "bg-orange-400",
+      "bg-pink-400",
+      "bg-yellow-400",
+      "bg-red-400"
+    ]
+    const index = Math.abs(subjectCode.split('').reduce((a, b) => a + b.charCodeAt(0), 0)) % colors.length
+    return colors[index]
+  }
+
   const filteredSchedule = selectedDay === "All" 
     ? schedule 
     : schedule.filter(item => item.day === selectedDay)
@@ -178,6 +211,27 @@ export function StudentClassSchedule() {
   const totalCredits = schedule.reduce((sum, item) => sum + item.credits, 0)
   const totalClasses = schedule.length
   const uniqueFaculty = [...new Set(schedule.map(item => item.facultyName))].length
+
+  const convertTimeTo24Hour = (time: string) => {
+    const [timePart, modifier] = time.split(' ')
+    let [hours, minutes] = timePart.split(':').map(Number)
+    
+    if (modifier === 'PM' && hours !== 12) {
+      hours += 12
+    } else if (modifier === 'AM' && hours === 12) {
+      hours = 0
+    }
+    
+    return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`
+  }
+
+  const isTimeInRange = (currentTime: string, startTime: string, endTime: string) => {
+    const current24 = convertTimeTo24Hour(currentTime)
+    const start24 = convertTimeTo24Hour(startTime)
+    const end24 = convertTimeTo24Hour(endTime)
+    
+    return current24 >= start24 && current24 < end24
+  }
 
   return (
     <div className="p-6 space-y-6">
@@ -194,84 +248,95 @@ export function StudentClassSchedule() {
         </div>
       </div>
 
-      {/* Student Info Header */}
-      <Card className="bg-gradient-to-r from-blue-50 to-purple-50 border-blue-200">
-        <CardContent className="p-6">
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-            <div className="flex items-center gap-4">
-              <div className="w-12 h-12 bg-blue-600 rounded-full flex items-center justify-center">
-                <User className="w-6 h-6 text-white" />
-              </div>
-              <div>
-                <p className="font-semibold text-gray-900">JOHN DOE</p>
-                <p className="text-sm text-gray-600">BSIT-2024-001</p>
-              </div>
-            </div>
-            <div>
-              <p className="text-sm text-gray-600">Total Credits</p>
-              <p className="text-2xl font-bold text-blue-600">{totalCredits}</p>
-            </div>
-            <div>
-              <p className="text-sm text-gray-600">Total Classes</p>
-              <p className="text-2xl font-bold text-purple-600">{totalClasses}</p>
-            </div>
-            <div>
-              <p className="text-sm text-gray-600">Academic Year</p>
-              <p className="font-semibold">2024-2025 (First Semester)</p>
-            </div>
+      {/* Subject Details Table */}
+      <Card>
+        <CardContent className="p-0">
+          <Table>
+            <TableHeader>
+              <TableRow className="bg-gray-100">
+                <TableHead className="border border-gray-300 text-center font-bold">#</TableHead>
+                <TableHead className="border border-gray-300 text-center font-bold">Subject Code</TableHead>
+                <TableHead className="border border-gray-300 text-center font-bold">Description</TableHead>
+                <TableHead className="border border-gray-300 text-center font-bold">Lec</TableHead>
+                <TableHead className="border border-gray-300 text-center font-bold">Lab</TableHead>
+                <TableHead className="border border-gray-300 text-center font-bold">Units</TableHead>
+                <TableHead className="border border-gray-300 text-center font-bold">Schedule</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {schedule.map((item, index) => (
+                <TableRow key={item.id} className={index % 2 === 0 ? "bg-gray-50" : "bg-white"}>
+                  <TableCell className="border border-gray-300 text-center">{index + 1}</TableCell>
+                  <TableCell className="border border-gray-300 text-center font-medium">{item.subjectCode}</TableCell>
+                  <TableCell className="border border-gray-300 px-3">{item.subjectName}</TableCell>
+                  <TableCell className="border border-gray-300 text-center">{item.lec}</TableCell>
+                  <TableCell className="border border-gray-300 text-center">{item.lab}</TableCell>
+                  <TableCell className="border border-gray-300 text-center">{item.units}</TableCell>
+                  <TableCell className="border border-gray-300 text-center text-sm">{item.schedule}</TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </CardContent>
+      </Card>
+
+      {/* Weekly Schedule Grid */}
+      <Card>
+        <CardContent className="p-0">
+          <div className="overflow-x-auto">
+            <table className="w-full border-collapse">
+              <thead>
+                <tr className="bg-gray-100">
+                  <th className="border border-gray-300 p-2 text-center font-bold min-w-[80px]">Time</th>
+                  {days.map(day => (
+                    <th key={day} className="border border-gray-300 p-2 text-center font-bold min-w-[120px]">
+                      {day}
+                    </th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {timeSlots.map(timeSlot => (
+                  <tr key={timeSlot}>
+                    <td className="border border-gray-300 p-2 text-center text-sm font-medium bg-gray-50">
+                      {timeSlot}
+                    </td>
+                    {days.map(day => {
+                      const dayClasses = getClassesForDay(day)
+                      const classAtTime = dayClasses.find(cls => {
+                        const classStart = cls.timeStart.includes(':') ? 
+                          (parseInt(cls.timeStart.split(':')[0]) >= 12 ? cls.timeStart + ' PM' : cls.timeStart + ' AM') :
+                          cls.timeStart
+                        const classEnd = cls.timeEnd.includes(':') ? 
+                          (parseInt(cls.timeEnd.split(':')[0]) >= 12 ? cls.timeEnd + ' PM' : cls.timeEnd + ' AM') :
+                          cls.timeEnd
+                        
+                        return isTimeInRange(timeSlot, classStart, classEnd)
+                      })
+                      
+                      return (
+                        <td key={`${day}-${timeSlot}`} className="border border-gray-300 p-1 h-12 relative">
+                          {classAtTime && (
+                            <div className={`${getSubjectColor(classAtTime.subjectCode)} rounded text-white text-xs p-1 h-full flex flex-col justify-center items-center`}>
+                              <div className="font-bold text-center">{classAtTime.subjectCode}</div>
+                              <div className="text-center leading-tight">
+                                BSIT 3-{classAtTime.section}
+                              </div>
+                              <div className="text-center text-xs">{classAtTime.building} {classAtTime.room}</div>
+                            </div>
+                          )}
+                        </td>
+                      )
+                    })}
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           </div>
         </CardContent>
       </Card>
 
-      {/* Schedule Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-        <Card>
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-gray-600">Total Subjects</p>
-                <p className="text-2xl font-bold text-gray-900">{totalClasses}</p>
-              </div>
-              <BookOpen className="w-8 h-8 text-blue-600" />
-            </div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-gray-600">Credit Hours</p>
-                <p className="text-2xl font-bold text-purple-600">{totalCredits}</p>
-              </div>
-              <Clock className="w-8 h-8 text-purple-600" />
-            </div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-gray-600">Faculty Count</p>
-                <p className="text-2xl font-bold text-green-600">{uniqueFaculty}</p>
-              </div>
-              <User className="w-8 h-8 text-green-600" />
-            </div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-gray-600">Class Days</p>
-                <p className="text-2xl font-bold text-orange-600">{[...new Set(schedule.map(s => s.day))].length}</p>
-              </div>
-              <Calendar className="w-8 h-8 text-orange-600" />
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* Filters */}
+      {/* Filters - Keep existing functionality */}
       <Card>
         <CardContent className="p-6">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -301,54 +366,7 @@ export function StudentClassSchedule() {
         </CardContent>
       </Card>
 
-      {/* Weekly Grid View */}
-      {viewMode === "weekly" && (
-        <Card>
-          <CardHeader>
-            <CardTitle>Weekly Schedule Grid</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="overflow-x-auto">
-              <div className="grid grid-cols-8 gap-2 min-w-full">
-                {/* Header */}
-                <div className="text-sm font-medium text-gray-600 p-2">Time</div>
-                {days.map(day => (
-                  <div key={day} className="text-sm font-medium text-gray-600 p-2 text-center">
-                    {day}
-                  </div>
-                ))}
-
-                {/* Time slots */}
-                {timeSlots.map(time => (
-                  <React.Fragment key={time}>
-                    <div className="text-xs text-gray-500 p-2 border-r">{time}</div>
-                    {days.map(day => {
-                      const dayClasses = getClassesForDay(day)
-                      const classAtTime = dayClasses.find(cls => 
-                        time >= cls.timeStart && time < cls.timeEnd
-                      )
-                      
-                      return (
-                        <div key={`${day}-${time}`} className="p-1 border border-gray-100 min-h-[60px]">
-                          {classAtTime && time === classAtTime.timeStart && (
-                            <div className={`${classAtTime.color} rounded p-2 text-xs border-l-4`}>
-                              <div className="font-medium">{classAtTime.subjectCode}</div>
-                              <div className="text-gray-600">{classAtTime.room}</div>
-                              <div className="text-gray-500">{classAtTime.timeStart}-{classAtTime.timeEnd}</div>
-                            </div>
-                          )}
-                        </div>
-                      )
-                    })}
-                  </React.Fragment>
-                ))}
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      )}
-
-      {/* Daily List View */}
+      {/* Daily List View - Keep existing */}
       {viewMode === "daily" && (
         <Card>
           <CardHeader>
@@ -408,51 +426,6 @@ export function StudentClassSchedule() {
                 ))}
               </TableBody>
             </Table>
-          </CardContent>
-        </Card>
-      )}
-
-      {/* Today's Classes Quick View */}
-      {viewMode === "weekly" && (
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Calendar className="w-5 h-5" />
-              Today's Classes
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-3">
-              {getClassesForDay("Monday").map((classItem) => (
-                <div key={classItem.id} className={`${classItem.color} rounded-lg p-4 border-l-4`}>
-                  <div className="flex justify-between items-start">
-                    <div>
-                      <h4 className="font-semibold">{classItem.subjectCode} - {classItem.subjectName}</h4>
-                      <div className="flex items-center gap-4 mt-2 text-sm text-gray-600">
-                        <span className="flex items-center gap-1">
-                          <Clock className="w-4 h-4" />
-                          {classItem.timeStart} - {classItem.timeEnd}
-                        </span>
-                        <span className="flex items-center gap-1">
-                          <MapPin className="w-4 h-4" />
-                          {classItem.room}, {classItem.building}
-                        </span>
-                        <span className="flex items-center gap-1">
-                          <User className="w-4 h-4" />
-                          {classItem.facultyName}
-                        </span>
-                      </div>
-                    </div>
-                    <Badge className={getClassTypeColor(classItem.classType)}>
-                      {classItem.classType}
-                    </Badge>
-                  </div>
-                </div>
-              ))}
-              {getClassesForDay("Monday").length === 0 && (
-                <p className="text-gray-500 text-center py-4">No classes scheduled for today</p>
-              )}
-            </div>
           </CardContent>
         </Card>
       )}
