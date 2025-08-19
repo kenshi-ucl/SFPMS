@@ -188,13 +188,13 @@ export function StudentClassSchedule() {
 
   const getSubjectColor = (subjectCode: string) => {
     const colors = [
-      "bg-green-400",
-      "bg-blue-400", 
-      "bg-purple-400",
-      "bg-orange-400",
-      "bg-pink-400",
-      "bg-yellow-400",
-      "bg-red-400"
+      "bg-blue-200 border-l-4 border-blue-500",
+      "bg-purple-200 border-l-4 border-purple-500", 
+      "bg-green-200 border-l-4 border-green-500",
+      "bg-orange-200 border-l-4 border-orange-500",
+      "bg-pink-200 border-l-4 border-pink-500",
+      "bg-yellow-200 border-l-4 border-yellow-500",
+      "bg-indigo-200 border-l-4 border-indigo-500"
     ]
     const index = Math.abs(subjectCode.split('').reduce((a, b) => a + b.charCodeAt(0), 0)) % colors.length
     return colors[index]
@@ -282,26 +282,30 @@ export function StudentClassSchedule() {
 
       {/* Weekly Schedule Grid */}
       <Card>
+        <CardHeader>
+          <CardTitle>Weekly Schedule</CardTitle>
+        </CardHeader>
         <CardContent className="p-0">
           <div className="overflow-x-auto">
             <table className="w-full border-collapse">
               <thead>
                 <tr className="bg-gray-100">
-                  <th className="border border-gray-300 p-2 text-center font-bold min-w-[80px]">Time</th>
-                  {days.map(day => (
-                    <th key={day} className="border border-gray-300 p-2 text-center font-bold min-w-[120px]">
-                      {day}
-                    </th>
-                  ))}
+                  <th className="border border-gray-300 p-3 text-center font-bold min-w-[120px]">Time</th>
+                  <th className="border border-gray-300 p-3 text-center font-bold min-w-[180px]">Monday</th>
+                  <th className="border border-gray-300 p-3 text-center font-bold min-w-[180px]">Tuesday</th>
+                  <th className="border border-gray-300 p-3 text-center font-bold min-w-[180px]">Wednesday</th>
+                  <th className="border border-gray-300 p-3 text-center font-bold min-w-[180px]">Thursday</th>
+                  <th className="border border-gray-300 p-3 text-center font-bold min-w-[180px]">Friday</th>
+                  <th className="border border-gray-300 p-3 text-center font-bold min-w-[180px]">Saturday</th>
                 </tr>
               </thead>
               <tbody>
                 {timeSlots.map(timeSlot => (
                   <tr key={timeSlot}>
-                    <td className="border border-gray-300 p-2 text-center text-sm font-medium bg-gray-50">
+                    <td className="border border-gray-300 p-3 text-center text-sm font-medium bg-gray-50 align-top">
                       {timeSlot}
                     </td>
-                    {days.map(day => {
+                    {days.slice(0, 6).map(day => {
                       const dayClasses = getClassesForDay(day)
                       const classAtTime = dayClasses.find(cls => {
                         const classStart = cls.timeStart.includes(':') ? 
@@ -315,14 +319,23 @@ export function StudentClassSchedule() {
                       })
                       
                       return (
-                        <td key={`${day}-${timeSlot}`} className="border border-gray-300 p-1 h-12 relative">
+                        <td key={`${day}-${timeSlot}`} className="border border-gray-300 p-2 align-top" style={{ minHeight: '80px' }}>
                           {classAtTime && (
-                            <div className={`${getSubjectColor(classAtTime.subjectCode)} rounded text-white text-xs p-1 h-full flex flex-col justify-center items-center`}>
-                              <div className="font-bold text-center">{classAtTime.subjectCode}</div>
-                              <div className="text-center leading-tight">
-                                BSIT 3-{classAtTime.section}
+                            <div className={`${getSubjectColor(classAtTime.subjectCode)} rounded-lg text-gray-800 p-3 min-h-[70px] flex flex-col justify-between`}>
+                              <div>
+                                <div className="font-bold text-sm mb-1">{classAtTime.subjectCode}</div>
+                                <div className="text-xs mb-1">{classAtTime.subjectName}</div>
                               </div>
-                              <div className="text-center text-xs">{classAtTime.building} {classAtTime.room}</div>
+                              <div className="text-xs">
+                                <div className="flex items-center gap-1 mb-1">
+                                  <MapPin className="w-3 h-3" />
+                                  <span>{classAtTime.building} {classAtTime.room}</span>
+                                </div>
+                                <div className="flex items-center gap-1">
+                                  <User className="w-3 h-3" />
+                                  <span>BSIT 3-{classAtTime.section}</span>
+                                </div>
+                              </div>
                             </div>
                           )}
                         </td>
