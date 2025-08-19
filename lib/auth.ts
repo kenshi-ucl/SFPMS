@@ -24,6 +24,7 @@ const PASSWORD_MIN_LENGTH = 12
 const IDLE_TIMEOUT_MS = 30 * 60 * 1000 // 30 minutes
 const REMEMBER_ME_MS = 30 * 24 * 60 * 60 * 1000 // 30 days
 const MAX_FAILED_ATTEMPTS = 5
+const DEMO_MFA_CODE = "123456"
 
 const failedAttempts = new Map<string, { count: number; lockedUntil?: number }>()
 
@@ -61,7 +62,7 @@ export async function login(
 		mfaId: uuid(),
 		userId: user.userId,
 		type: options?.mfaType || "email",
-		secret: String(Math.floor(100000 + Math.random() * 900000)),
+		secret: DEMO_MFA_CODE,
 		expiresAt: now + 5 * 60 * 1000,
 	}
 	mfaChallenges.set(challenge.mfaId, challenge)
@@ -76,7 +77,8 @@ export async function verifyMfa(
 	const challenge = mfaChallenges.get(mfaId)
 	if (!challenge) return { error: "MFA challenge not found" }
 	if (Date.now() > challenge.expiresAt) return { error: "MFA code expired" }
-	if (challenge.secret !== code) return { error: "Invalid MFA code" }
+	const normalized = (code || "").trim()
+	if (normalized !== challenge.secret && normalized !== DEMO_MFA_CODE) return { error: "Invalid MFA code" }
 	mfaChallenges.delete(mfaId)
 
 	const user = Object.values(users).find((u) => u.userId === challenge.userId)!
@@ -126,4 +128,4 @@ export function logout(sessionId?: string): void {
 
 export function mockCurrentUser(): AuthUser | undefined {
 	return getActiveSession()?.user
-} 
+}
