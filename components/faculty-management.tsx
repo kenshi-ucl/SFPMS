@@ -33,6 +33,7 @@ interface Faculty {
   teachingLoad: number
   feedbackRating: number
   profilePhoto?: string
+  isArchived?: boolean
 }
 
 interface Qualification {
@@ -134,8 +135,9 @@ const mockFaculty: Faculty[] = [
 export function FacultyManagement() {
   const [faculty, setFaculty] = useState<Faculty[]>(mockFaculty)
   const [searchTerm, setSearchTerm] = useState("")
-  const [selectedDepartment, setSelectedDepartment] = useState("")
-  const [selectedDesignation, setSelectedDesignation] = useState("")
+  const [selectedDepartment, setSelectedDepartment] = useState("all")
+  const [selectedDesignation, setSelectedDesignation] = useState("all")
+  const [selectedStatus, setSelectedStatus] = useState<string>("All")
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false)
   const [currentStep, setCurrentStep] = useState(1)
   const [newFaculty, setNewFaculty] = useState<Partial<Faculty>>({
@@ -152,9 +154,12 @@ export function FacultyManagement() {
       member.lastName.toLowerCase().includes(searchTerm.toLowerCase()) ||
       member.employeeId.toLowerCase().includes(searchTerm.toLowerCase()) ||
       member.email.toLowerCase().includes(searchTerm.toLowerCase())
-    const matchesDepartment = !selectedDepartment || member.department === selectedDepartment
-    const matchesDesignation = !selectedDesignation || member.designation === selectedDesignation
-    return matchesSearch && matchesDepartment && matchesDesignation
+    const matchesDepartment = !selectedDepartment || selectedDepartment === "all" || member.department === selectedDepartment
+    const matchesDesignation = !selectedDesignation || selectedDesignation === "all" || member.designation === selectedDesignation
+    const matchesStatus =
+      selectedStatus === "All" ||
+      (selectedStatus === "Archived" ? member.isArchived === true : member.isArchived !== true)
+    return matchesSearch && matchesDepartment && matchesDesignation && matchesStatus
   })
 
   const getStatusColor = (status: string) => {
@@ -964,6 +969,48 @@ export function FacultyManagement() {
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+              <Input
+                placeholder="Search by name, employee ID, or email..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+              />
+              <Select value={selectedDepartment} onValueChange={setSelectedDepartment}>
+                <SelectTrigger>
+                  <SelectValue placeholder="All Departments" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Departments</SelectItem>
+                  <SelectItem value="Computer Science">Computer Science</SelectItem>
+                  <SelectItem value="Mechanical Engineering">Mechanical Engineering</SelectItem>
+                  <SelectItem value="Business Administration">Business Administration</SelectItem>
+                  <SelectItem value="Mathematics">Mathematics</SelectItem>
+                </SelectContent>
+              </Select>
+              <Select value={selectedDesignation} onValueChange={setSelectedDesignation}>
+                <SelectTrigger>
+                  <SelectValue placeholder="All Designations" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Designations</SelectItem>
+                  <SelectItem value="Professor">Professor</SelectItem>
+                  <SelectItem value="Associate Professor">Associate Professor</SelectItem>
+                  <SelectItem value="Assistant Professor">Assistant Professor</SelectItem>
+                  <SelectItem value="Lecturer">Lecturer</SelectItem>
+                </SelectContent>
+              </Select>
+              <Select value={selectedStatus} onValueChange={setSelectedStatus}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Status" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="All">All</SelectItem>
+                  <SelectItem value="Active">Active</SelectItem>
+                  <SelectItem value="Archived">Archived</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
             {filteredFaculty.map((member) => (
               <div key={member.id} className="border rounded-lg p-4 hover:bg-gray-50 transition-colors">
                 <div className="flex items-center justify-between">
@@ -1011,6 +1058,9 @@ export function FacultyManagement() {
                     <Badge className={getStatusColor(member.employmentStatus)}>
                       {member.employmentStatus.replace("_", " ")}
                     </Badge>
+                    {member.isArchived && (
+                      <Badge className="bg-gray-100 text-gray-800">Archived</Badge>
+                    )}
                     <div className="flex gap-1">
                       <Button variant="ghost" size="sm">
                         <Eye className="w-4 h-4" />
@@ -1018,8 +1068,18 @@ export function FacultyManagement() {
                       <Button variant="ghost" size="sm">
                         <Edit className="w-4 h-4" />
                       </Button>
-                      <Button variant="ghost" size="sm" className="text-red-600 hover:text-red-700">
-                        <Trash2 className="w-4 h-4" />
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="text-red-600 hover:text-red-700"
+                        onClick={() =>
+                          setFaculty((prev) =>
+                            prev.map((f) => (f.id === member.id ? { ...f, isArchived: !f.isArchived } : f))
+                          )
+                        }
+                        title={member.isArchived ? "Restore" : "Archive"}
+                      >
+                        {member.isArchived ? "Restore" : "Archive"}
                       </Button>
                     </div>
                   </div>

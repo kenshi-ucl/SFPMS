@@ -4,7 +4,7 @@ import { useEffect, useState } from "react"
 import { LoginForm } from "@/components/login-form"
 import { AppSidebar } from "@/components/app-sidebar"
 import { DashboardHeader } from "@/components/dashboard-header"
-import { DashboardHome } from "@/components/dashboard-home"
+import { Dashboard } from "@/components/dashboard"
 import { StudentsManagement } from "@/components/students-management"
 import { FacultyManagement } from "@/components/faculty-management"
 import { DepartmentsManagement } from "@/components/departments-management"
@@ -15,8 +15,18 @@ import { AuditLog } from "@/components/audit-log"
 import { UserProfile } from "@/components/user-profile"
 import { SidebarProvider, SidebarInset } from "@/components/ui/sidebar"
 import { getActiveSession } from "@/lib/auth"
-import { StudentPortal } from "@/components/student-portal"
-import { FacultyPortal } from "@/components/faculty-portal"
+import { NotificationsCenter } from "@/components/notifications-center"
+import { ReportsCenter } from "@/components/reports-center"
+import { MyStudents } from "@/components/my-students"
+import { MyGrades } from "@/components/my-grades"
+import { SystemSettings } from "@/components/system-settings"
+import { StudentEnrollment } from "@/components/student-enrollment"
+import { EnrollmentManagement } from "@/components/enrollment-management"
+import { DeptEnrollmentManagement } from "@/components/dept-enrollment-management"
+import { FacultyCourses } from "@/components/faculty-courses"
+import { FacultySchedule } from "@/components/faculty-schedule"
+import { FacultyStudentGrades } from "@/components/faculty-student-grades"
+import { FacultyAttendance } from "@/components/faculty-attendance"
 
 export default function Home() {
   const [isLoggedIn, setIsLoggedIn] = useState(false)
@@ -28,58 +38,94 @@ export default function Home() {
     setIsLoggedIn(!!session)
     if (session?.user) {
       setCurrentUser(session.user)
-      const role = session.user.role
-      if (role === "faculty") setActiveSection("faculty-portal")
-      else if (role === "student") setActiveSection("student-portal")
-      else setActiveSection("dashboard")
+      setActiveSection("dashboard") // All roles start with dashboard
     }
   }, [])
 
   if (!isLoggedIn) {
-    return <LoginForm onLogin={() => {
-      const s = getActiveSession();
-      setIsLoggedIn(true); 
-      if (s?.user) {
-        setCurrentUser(s.user)
-        const role = s.user.role
-        if (role === "faculty") setActiveSection("faculty-portal")
-        else if (role === "student") setActiveSection("student-portal")
-        else if (role === "dept_admin") setActiveSection("dashboard")
-        else setActiveSection("dashboard")
-      }
-    }} />
+    return (
+      <LoginForm
+        onLogin={() => {
+          const s = getActiveSession()
+          setIsLoggedIn(true)
+          if (s?.user) {
+            setCurrentUser(s.user)
+            setActiveSection("dashboard")
+          }
+        }}
+      />
+    )
   }
 
   const renderActiveSection = () => {
     const role = currentUser?.role || "admin"
-    switch (activeSection) {
-      case "dashboard":
-        return <DashboardHome />
-      case "users":
-        return role === "admin" ? <UsersManagement /> : <DashboardHome />
-      case "courses":
-        return role === "admin" || role === "dept_admin" ? <CoursesManagement /> : <DashboardHome />
-      case "students":
-        return role === "admin" || role === "dept_admin" ? <StudentsManagement /> : <DashboardHome />
-      case "faculty":
-        return role === "admin" || role === "dept_admin" ? <FacultyManagement /> : <DashboardHome />
-      case "departments":
-        return role === "admin" || role === "dept_admin" ? <DepartmentsManagement /> : <DashboardHome />
-      case "academic-years":
-        return role === "admin" || role === "dept_admin" ? <AcademicYearsManagement /> : <DashboardHome />
-      case "audit-log":
-        return role === "admin" ? <AuditLog /> : <DashboardHome />
-      case "profile":
-        return <UserProfile />
-      case "settings":
-        return <UserProfile />
-      case "student-portal":
-        return <StudentPortal />
-      case "faculty-portal":
-        return <FacultyPortal />
-      default:
-        return <DashboardHome />
+    
+    // Common sections for all roles
+    if (activeSection === "dashboard") return <Dashboard />
+    if (activeSection === "profile") return <UserProfile />
+    if (activeSection === "notifications") return <NotificationsCenter />
+
+    // Admin-only sections
+    if (role === "admin") {
+      switch (activeSection) {
+        case "users": return <UsersManagement />
+        case "faculty": return <FacultyManagement />
+        case "students": return <StudentsManagement />
+        case "enrollment-management": return <EnrollmentManagement />
+        case "courses": return <CoursesManagement />
+        case "departments": return <DepartmentsManagement />
+        case "academic-years": return <AcademicYearsManagement />
+        case "reports": return <ReportsCenter />
+        case "audit-log": return <AuditLog />
+        case "settings": return <SystemSettings />
+        default: return <Dashboard />
+      }
     }
+
+    // Department Admin sections
+    if (role === "dept_admin") {
+      switch (activeSection) {
+        case "faculty": return <FacultyManagement />
+        case "students": return <StudentsManagement />
+        case "student-enrollment": return <DeptEnrollmentManagement />
+        case "courses": return <CoursesManagement />
+        case "departments": return <DepartmentsManagement />
+        case "academic-years": return <AcademicYearsManagement />
+        case "reports": return <ReportsCenter />
+        case "settings": return <SystemSettings />
+        default: return <Dashboard />
+      }
+    }
+
+    // Faculty-only sections  
+    if (role === "faculty") {
+      switch (activeSection) {
+        case "my-students": return <MyStudents />
+        case "my-courses": return <FacultyCourses />
+        case "class-schedule": return <FacultySchedule />
+        case "student-grades": return <FacultyStudentGrades />
+        case "attendance": return <FacultyAttendance />
+        case "course-reports": return <div className="p-6"><h1 className="text-3xl font-bold">Course Reports</h1><p>Course reports coming soon...</p></div>
+        case "settings": return <UserProfile />
+        default: return <Dashboard />
+      }
+    }
+
+    // Student-only sections
+    if (role === "student") {
+      switch (activeSection) {
+        case "my-grades": return <MyGrades />
+        case "class-schedule": return <div className="p-6"><h1 className="text-3xl font-bold">Class Schedule</h1><p>Your class schedule coming soon...</p></div>
+        case "my-courses": return <div className="p-6"><h1 className="text-3xl font-bold">My Courses</h1><p>Your enrolled courses coming soon...</p></div>
+        case "my-attendance": return <div className="p-6"><h1 className="text-3xl font-bold">My Attendance</h1><p>Your attendance record coming soon...</p></div>
+        case "academic-progress": return <div className="p-6"><h1 className="text-3xl font-bold">Academic Progress</h1><p>Your academic progress tracking coming soon...</p></div>
+        case "settings": return <UserProfile />
+        default: return <Dashboard />
+      }
+    }
+
+    // Fallback
+    return <Dashboard />
   }
 
   return (

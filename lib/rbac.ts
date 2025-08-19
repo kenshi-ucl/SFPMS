@@ -23,7 +23,7 @@ const rolePermissions: Record<UserRole, ReadonlyArray<Permission>> = {
 		"academic-years:manage",
 	],
 	faculty: ["profiles:read", "reports:read"],
-	student: ["profiles:read"],
+	student: ["profiles:read", "reports:read"],
 }
 
 export function hasPermission(user: Pick<AuthUser, "role">, permission: Permission): boolean {

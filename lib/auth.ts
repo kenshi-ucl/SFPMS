@@ -124,22 +124,42 @@ export async function verifyMfa(
 		rememberUntil: options?.remember ? Date.now() + REMEMBER_ME_MS : undefined,
 	}
 	activeSessions.set(session.sessionId, session)
+	try {
+		if (typeof window !== "undefined") {
+			window.localStorage.setItem("sfpms_session_id", session.sessionId)
+		}
+	} catch {}
 	return { session }
 }
 
 export function getActiveSession(): Session | undefined {
-	for (const s of activeSessions.values()) {
-		if (s.status === "active") {
-			const timedOut = Date.now() - s.lastActivity > IDLE_TIMEOUT_MS
-			const remembered = s.rememberUntil && Date.now() < s.rememberUntil
-			if (timedOut && !remembered) {
-				s.status = "expired"
-				continue
+	// Prefer the browser-bound session id if present
+	try {
+		if (typeof window !== "undefined") {
+			const sid = window.localStorage.getItem("sfpms_session_id")
+			if (sid) {
+				const s = activeSessions.get(sid)
+				if (s && s.status === "active") {
+					const timedOut = Date.now() - s.lastActivity > IDLE_TIMEOUT_MS
+					const remembered = s.rememberUntil && Date.now() < s.rememberUntil
+					if (!timedOut || remembered) return s
+				}
 			}
-			return s
 		}
+	} catch {}
+	// Fallback: return the most recently active session
+	let latest: Session | undefined
+	for (const s of activeSessions.values()) {
+		if (s.status !== "active") continue
+		const timedOut = Date.now() - s.lastActivity > IDLE_TIMEOUT_MS
+		const remembered = s.rememberUntil && Date.now() < s.rememberUntil
+		if (timedOut && !remembered) {
+			s.status = "expired"
+			continue
+		}
+		if (!latest || s.lastActivity > latest.lastActivity) latest = s
 	}
-	return undefined
+	return latest
 }
 
 export function touchSession(sessionId: string): void {
@@ -149,11 +169,22 @@ export function touchSession(sessionId: string): void {
 }
 
 export function logout(sessionId?: string): void {
-	if (sessionId && activeSessions.has(sessionId)) {
-		const s = activeSessions.get(sessionId)!
+	let sid = sessionId
+	try {
+		if (!sid && typeof window !== "undefined") {
+			sid = window.localStorage.getItem("sfpms_session_id") || undefined
+		}
+	} catch {}
+	if (sid && activeSessions.has(sid)) {
+		const s = activeSessions.get(sid)!
 		s.status = "terminated"
-		activeSessions.delete(sessionId)
+		activeSessions.delete(sid)
 	}
+	try {
+		if (typeof window !== "undefined") {
+			window.localStorage.removeItem("sfpms_session_id")
+		}
+	} catch {}
 }
 
 export function mockCurrentUser(): AuthUser | undefined {
