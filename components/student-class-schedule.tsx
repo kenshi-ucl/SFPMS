@@ -175,6 +175,18 @@ const timeSlots = [
   { main: "09:30 PM", top: "09:00 PM", bottom: "09:59 PM" },
 ]
 
+// Helpers to work with minutes
+const parseSlotToMinutes = (label: string) => {
+  const [time, mer] = label.split(" ")
+  const [hh, mm] = time.split(":").map(Number)
+  let h = hh % 12
+  if (mer === 'PM') h += 12
+  if (mer === 'AM' && hh === 12) h = 0
+  return h * 60 + mm
+}
+const timeSlotsMinutes = timeSlots.map(s => parseSlotToMinutes(s.main))
+const sortedSlotMinutes = [...timeSlotsMinutes].sort((a, b) => a - b)
+
 const days = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
 
 export function StudentClassSchedule() {
@@ -199,13 +211,13 @@ export function StudentClassSchedule() {
 
   const getSubjectColor = (subjectCode: string) => {
     const colors = [
-      "bg-blue-200/80 border-l-4 border-blue-500",
-      "bg-purple-200/80 border-l-4 border-purple-500", 
-      "bg-green-200/80 border-l-4 border-green-500",
-      "bg-orange-200/80 border-l-4 border-orange-500",
-      "bg-pink-200/80 border-l-4 border-pink-500",
-      "bg-yellow-200/80 border-l-4 border-yellow-500",
-      "bg-indigo-200/80 border-l-4 border-indigo-500"
+      "bg-blue-600 text-white border border-blue-700 shadow-sm",
+      "bg-purple-600 text-white border border-purple-700 shadow-sm", 
+      "bg-green-600 text-white border border-green-700 shadow-sm",
+      "bg-orange-500 text-white border border-orange-600 shadow-sm",
+      "bg-pink-600 text-white border border-pink-700 shadow-sm",
+      "bg-yellow-500 text-white border border-yellow-600 shadow-sm",
+      "bg-indigo-600 text-white border border-indigo-700 shadow-sm"
     ]
     const index = Math.abs(subjectCode.split('').reduce((a, b) => a + b.charCodeAt(0), 0)) % colors.length
     return colors[index]
@@ -215,9 +227,172 @@ export function StudentClassSchedule() {
     ? schedule 
     : schedule.filter(item => item.day === selectedDay)
 
+  // Parse the top-table schedule strings (e.g., "M-W: 9:30AM-11:00AM") into concrete day/time entries
+  const expandScheduleFromTopTable = React.useMemo(() => {
+    const abbrevToDay: Record<string, string> = {
+      M: "Monday",
+      T: "Tuesday",
+      W: "Wednesday",
+      Th: "Thursday",
+      F: "Friday",
+      Sat: "Saturday",
+      Sun: "Sunday"
+    }
+
+    const to24HourNoSuffix = (time: string) => {
+      const match = time.trim().match(/^(\d{1,2}):(\d{2})(AM|PM)$/i)
+      if (!match) return time
+      let hours = parseInt(match[1], 10)
+      const minutes = match[2]
+      const period = match[3].toUpperCase()
+      if (period === 'PM' && hours !== 12) hours += 12
+      if (period === 'AM' && hours === 12) hours = 0
+      return `${hours.toString().padStart(2, '0')}:${minutes}`
+    }
+
+    const toMinutes = (hhmm: string) => {
+      const [h, m] = hhmm.split(":").map(Number)
+      return h * 60 + m
+    }
+
+    const fromMinutes = (min: number) => {
+      const h = Math.floor(min / 60) % 24
+      const m = min % 60
+      return `${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}`
+    }
+
+    const slotMinutes = [...sortedSlotMinutes]
+
+    const nextSlotAtOrAfter = (min: number) => {
+      for (let i = 0; i < slotMinutes.length; i++) {
+        if (slotMinutes[i] >= min) return slotMinutes[i]
+      }
+      return slotMinutes[slotMinutes.length - 1]
+    }
+
+    const dayAllocations: Record<string, Array<{ start: number; end: number }>> = {}
+
+    const expanded: ClassScheduleItem[] = []
+
+    schedule.forEach(item => {
+      const colonIndex = item.schedule.indexOf(':')
+      if (colonIndex === -1) {
+        expanded.push(item)
+        return
+      }
+
+      const daysPart = item.schedule.slice(0, colonIndex).trim()
+      const timePart = item.schedule.slice(colonIndex + 1).trim()
+      const [startRaw, endRaw] = timePart.split('-').map(s => s.trim())
+
+      const originalStart = to24HourNoSuffix(startRaw)
+      const originalEnd = to24HourNoSuffix(endRaw)
+      const duration = toMinutes(originalEnd) - toMinutes(originalStart)
+
+      const tokens = daysPart.match(/Sun|Sat|Th|M|T|W|F/g) || []
+      const mappedDays = tokens.map(t => abbrevToDay[t]).filter(Boolean)
+
+      if (mappedDays.length === 0) {
+        expanded.push(item)
+        return
+      }
+
+      mappedDays.forEach(dayName => {
+        if (!dayAllocations[dayName]) dayAllocations[dayName] = []
+
+        let desiredStart = toMinutes(originalStart)
+        let desiredEnd = desiredStart + duration
+
+        // Resolve conflicts by shifting to the next available slot on the same day
+        const conflicts = () => dayAllocations[dayName].some(b => !(desiredEnd <= b.start || desiredStart >= b.end))
+        while (conflicts()) {
+          const latestEnd = Math.max(...dayAllocations[dayName].filter(b => !(desiredEnd <= b.start || desiredStart >= b.end)).map(b => b.end))
+          // Snap to next grid slot at or after latestEnd
+          desiredStart = nextSlotAtOrAfter(latestEnd)
+          desiredEnd = desiredStart + duration
+          // If still overlaps, loop continues; if beyond last slot, will clamp to last slot start
+        }
+
+        dayAllocations[dayName].push({ start: desiredStart, end: desiredEnd })
+
+        expanded.push({
+          ...item,
+          day: dayName,
+          timeStart: fromMinutes(desiredStart),
+          timeEnd: fromMinutes(desiredEnd)
+        })
+      })
+    })
+
+    return expanded
+  }, [schedule])
+
   const getClassesForDay = (day: string) => {
-    return schedule.filter(item => item.day === day)
+    return expandScheduleFromTopTable.filter(item => item.day === day)
   }
+
+  // Overlap-aware layout calculation per day
+  const layoutByDay = React.useMemo(() => {
+    const toMinutes = (t: string) => {
+      const [h, m] = t.split(":").map(Number)
+      return h * 60 + m
+    }
+
+    const map: Record<string, Record<string, { colIndex: number; colCount: number }>> = {}
+
+    days.slice(0, 6).forEach(day => {
+      const classes = getClassesForDay(day)
+      if (classes.length === 0) {
+        map[day] = {}
+        return
+      }
+
+      const events: Array<{ time: number; type: 'start' | 'end'; id: string }> = []
+      classes.forEach(cls => {
+        events.push({ time: toMinutes(cls.timeStart), type: 'start', id: cls.id })
+        events.push({ time: toMinutes(cls.timeEnd), type: 'end', id: cls.id })
+      })
+
+      // End before start at the same time to avoid false overlap at boundaries
+      events.sort((a, b) => a.time - b.time || (a.type === 'end' ? -1 : 1))
+
+      const active: string[] = []
+      const colIndexById: Record<string, number> = {}
+      const maxConcById: Record<string, number> = {}
+
+      events.forEach(evt => {
+        if (evt.type === 'end') {
+          const idx = active.indexOf(evt.id)
+          if (idx !== -1) active.splice(idx, 1)
+          return
+        }
+
+        // Assign smallest available column index
+        const used = new Set(active.map(id => colIndexById[id]))
+        let col = 0
+        while (used.has(col)) col++
+        colIndexById[evt.id] = col
+        active.push(evt.id)
+
+        const currentConcurrent = active.length
+        active.forEach(id => {
+          maxConcById[id] = Math.max(maxConcById[id] || 1, currentConcurrent)
+        })
+      })
+
+      const layout: Record<string, { colIndex: number; colCount: number }> = {}
+      classes.forEach(cls => {
+        layout[cls.id] = {
+          colIndex: colIndexById[cls.id] ?? 0,
+          colCount: maxConcById[cls.id] ?? 1
+        }
+      })
+
+      map[day] = layout
+    })
+
+    return map
+  }, [expandScheduleFromTopTable])
 
   const totalCredits = schedule.reduce((sum, item) => sum + item.credits, 0)
   const totalClasses = schedule.length
@@ -236,6 +411,11 @@ export function StudentClassSchedule() {
     return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`
   }
 
+  const toMinutesSimple = (hhmm: string) => {
+    const [h, m] = hhmm.split(':').map(Number)
+    return h * 60 + m
+  }
+
   const isTimeInRange = (currentTime: string, startTime: string, endTime: string) => {
     const current24 = convertTimeTo24Hour(currentTime)
     const start24 = convertTimeTo24Hour(startTime)
@@ -249,41 +429,19 @@ export function StudentClassSchedule() {
   }
 
   const calculateRowSpan = (startTime: string, endTime: string) => {
-    const startSlot = startTime.includes(':') ? 
-      (parseInt(startTime.split(':')[0]) >= 12 && parseInt(startTime.split(':')[0]) !== 12 ? startTime + ' PM' : 
-       parseInt(startTime.split(':')[0]) === 12 ? startTime + ' PM' : startTime + ' AM') :
-      startTime
-    const endSlot = endTime.includes(':') ? 
-      (parseInt(endTime.split(':')[0]) >= 12 && parseInt(endTime.split(':')[0]) !== 12 ? endTime + ' PM' : 
-       parseInt(endTime.split(':')[0]) === 12 ? endTime + ' PM' : endTime + ' AM') :
-      endTime
-    
-    const startIndex = getTimeSlotIndex(startSlot)
-    let endIndex = getTimeSlotIndex(endSlot)
-    
-    // If exact end time is not found, find the closest time slot
-    if (endIndex === -1) {
-      const endTime24 = convertTimeTo24Hour(endSlot)
-      for (let i = 0; i < timeSlots.length; i++) {
-        const slotTime24 = convertTimeTo24Hour(timeSlots[i].main)
-        if (slotTime24 > endTime24) {
-          endIndex = i
-          break
-        }
-      }
-      if (endIndex === -1) endIndex = timeSlots.length
-    }
-    
-    if (startIndex === -1) return 1
+    const startMin = toMinutesSimple(startTime)
+    const endMin = toMinutesSimple(endTime)
+    let startIndex = sortedSlotMinutes.findIndex(m => m >= startMin)
+    let endIndex = sortedSlotMinutes.findIndex(m => m >= endMin)
+    if (startIndex === -1) startIndex = 0
+    if (endIndex === -1) endIndex = sortedSlotMinutes.length
     return Math.max(1, endIndex - startIndex)
   }
 
   const isClassStartTime = (timeSlot: string, classItem: any) => {
-    const classStart = classItem.timeStart.includes(':') ? 
-      (parseInt(classItem.timeStart.split(':')[0]) >= 12 ? classItem.timeStart + ' PM' : classItem.timeStart + ' AM') :
-      classItem.timeStart
-    
-    return timeSlot === classStart
+    const slotMin = toMinutesSimple(convertTimeTo24Hour(timeSlot))
+    const classMin = toMinutesSimple(classItem.timeStart)
+    return slotMin === classMin
   }
 
   const getClassesPlacedAtTime = (day: string) => {
@@ -388,20 +546,9 @@ export function StudentClassSchedule() {
                     </td>
                     {days.slice(0, 6).map((day, dayIndex) => {
                       const dayClasses = getClassesForDay(day)
-                      const classAtTime = dayClasses.find(cls => {
-                        const classStart = cls.timeStart.includes(':') ? 
-                          (parseInt(cls.timeStart.split(':')[0]) >= 12 && parseInt(cls.timeStart.split(':')[0]) !== 12 ? cls.timeStart + ' PM' : 
-                           parseInt(cls.timeStart.split(':')[0]) === 12 ? cls.timeStart + ' PM' : cls.timeStart + ' AM') :
-                          cls.timeStart
-                        const classEnd = cls.timeEnd.includes(':') ? 
-                          (parseInt(cls.timeEnd.split(':')[0]) >= 12 && parseInt(cls.timeEnd.split(':')[0]) !== 12 ? cls.timeEnd + ' PM' : 
-                           parseInt(cls.timeEnd.split(':')[0]) === 12 ? cls.timeEnd + ' PM' : cls.timeEnd + ' AM') :
-                          cls.timeEnd
-                        
-                        return isTimeInRange(timeSlot.main, classStart, classEnd)
-                      })
-                      
-                      const isStartTime = classAtTime && isClassStartTime(timeSlot.main, classAtTime)
+
+                      // All classes that start at this time
+                      const startingClasses = dayClasses.filter(cls => isClassStartTime(timeSlot.main, cls))
                       
                       return (
                         <td key={`${day}-${timeSlot.main}`} className="border border-black align-top relative" style={{ minHeight: '50px', width: '150px' }}>
@@ -410,28 +557,37 @@ export function StudentClassSchedule() {
                               <div className="absolute top-1/2 left-0 right-0 border-t border-black"></div>
                             </div>
                           </div>
-                          {isStartTime && (
-                            <div 
-                              className={`${getSubjectColor(classAtTime.subjectCode)} absolute inset-0 flex items-center justify-center text-xs text-gray-900 z-10`}
-                              style={{ 
-                                height: `${calculateRowSpan(classAtTime.timeStart, classAtTime.timeEnd) * 50}px`,
-                                top: 0
-                              }}
-                            >
-                              <div className="text-center p-2">
-                                <div className="font-bold text-xs mb-1">{classAtTime.subjectCode}</div>
-                                <div className="text-xs mb-1 leading-tight">{classAtTime.subjectName}</div>
-                                <div className="flex items-center justify-center gap-1 mb-1">
-                                  <MapPin className="w-3 h-3 flex-shrink-0" />
-                                  <span className="text-xs">{classAtTime.building} {classAtTime.room}</span>
-                                </div>
-                                <div className="flex items-center justify-center gap-1">
-                                  <User className="w-3 h-3 flex-shrink-0" />
-                                  <span className="text-xs">BSIT 3-{classAtTime.section}</span>
+                          {startingClasses.map((classItem) => {
+                            const layout = layoutByDay[day]?.[classItem.id] || { colIndex: 0, colCount: 1 }
+                            const gap = 4
+                            const widthCalc = `calc((100% - ${(layout.colCount - 1) * gap}px) / ${layout.colCount})`
+                            const leftCalc = `calc(${layout.colIndex} * ((100% - ${(layout.colCount - 1) * gap}px) / ${layout.colCount}) + ${layout.colIndex * gap}px)`
+                            return (
+                              <div 
+                                key={classItem.id}
+                                className={`${getSubjectColor(classItem.subjectCode)} absolute flex items-center justify-center text-xs z-10 rounded-sm`}
+                                style={{ 
+                                  height: `${calculateRowSpan(classItem.timeStart, classItem.timeEnd) * 50}px`,
+                                  top: 0,
+                                  left: leftCalc,
+                                  width: widthCalc
+                                }}
+                              >
+                                <div className="text-center p-2">
+                                  <div className="font-bold text-xs mb-1">{classItem.subjectCode}</div>
+                                  <div className="text-xs mb-1 leading-tight">{classItem.subjectName}</div>
+                                  <div className="flex items-center justify-center gap-1 mb-1">
+                                    <MapPin className="w-3 h-3 flex-shrink-0" />
+                                    <span className="text-xs">{classItem.building} {classItem.room}</span>
+                                  </div>
+                                  <div className="flex items-center justify-center gap-1">
+                                    <User className="w-3 h-3 flex-shrink-0" />
+                                    <span className="text-xs">BSIT 3-{classItem.section}</span>
+                                  </div>
                                 </div>
                               </div>
-                            </div>
-                          )}
+                            )
+                          })}
                         </td>
                       )
                     })}
