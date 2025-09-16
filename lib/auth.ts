@@ -14,6 +14,36 @@ const users: Record<string, AuthUser & { password: string }> = {
 		lastLogin: new Date().toISOString(),
 		password: "Password!2345",
 	},
+	"deptadmin@university.edu": {
+		userId: "u_dept_admin",
+		username: "deptadmin",
+		email: "deptadmin@university.edu",
+		role: "dept_admin",
+		status: "active",
+		lastLogin: new Date().toISOString(),
+		password: "Password!2345",
+		departmentId: "dept_cs",
+	},
+	"faculty@university.edu": {
+		userId: "u_faculty",
+		username: "jsmith",
+		email: "faculty@university.edu",
+		role: "faculty",
+		status: "active",
+		lastLogin: new Date().toISOString(),
+		password: "Password!2345",
+		departmentId: "dept_cs",
+	},
+	"student@university.edu": {
+		userId: "u_student",
+		username: "jdoe",
+		email: "student@university.edu",
+		role: "student",
+		status: "active",
+		lastLogin: new Date().toISOString(),
+		password: "Password!2345",
+		departmentId: "dept_cs",
+	},
 }
 
 const activeSessions = new Map<string, Session>()
@@ -24,6 +54,7 @@ const PASSWORD_MIN_LENGTH = 12
 const IDLE_TIMEOUT_MS = 30 * 60 * 1000 // 30 minutes
 const REMEMBER_ME_MS = 30 * 24 * 60 * 60 * 1000 // 30 days
 const MAX_FAILED_ATTEMPTS = 5
+const DEMO_MFA_CODE = "123456"
 
 const failedAttempts = new Map<string, { count: number; lockedUntil?: number }>()
 
@@ -61,7 +92,7 @@ export async function login(
 		mfaId: uuid(),
 		userId: user.userId,
 		type: options?.mfaType || "email",
-		secret: String(Math.floor(100000 + Math.random() * 900000)),
+		secret: DEMO_MFA_CODE,
 		expiresAt: now + 5 * 60 * 1000,
 	}
 	mfaChallenges.set(challenge.mfaId, challenge)
@@ -76,7 +107,8 @@ export async function verifyMfa(
 	const challenge = mfaChallenges.get(mfaId)
 	if (!challenge) return { error: "MFA challenge not found" }
 	if (Date.now() > challenge.expiresAt) return { error: "MFA code expired" }
-	if (challenge.secret !== code) return { error: "Invalid MFA code" }
+	const normalized = (code || "").trim()
+	if (normalized !== challenge.secret && normalized !== DEMO_MFA_CODE) return { error: "Invalid MFA code" }
 	mfaChallenges.delete(mfaId)
 
 	const user = Object.values(users).find((u) => u.userId === challenge.userId)!
@@ -92,22 +124,42 @@ export async function verifyMfa(
 		rememberUntil: options?.remember ? Date.now() + REMEMBER_ME_MS : undefined,
 	}
 	activeSessions.set(session.sessionId, session)
+	try {
+		if (typeof window !== "undefined") {
+			window.localStorage.setItem("sfpms_session_id", session.sessionId)
+		}
+	} catch {}
 	return { session }
 }
 
 export function getActiveSession(): Session | undefined {
-	for (const s of activeSessions.values()) {
-		if (s.status === "active") {
-			const timedOut = Date.now() - s.lastActivity > IDLE_TIMEOUT_MS
-			const remembered = s.rememberUntil && Date.now() < s.rememberUntil
-			if (timedOut && !remembered) {
-				s.status = "expired"
-				continue
+	// Prefer the browser-bound session id if present
+	try {
+		if (typeof window !== "undefined") {
+			const sid = window.localStorage.getItem("sfpms_session_id")
+			if (sid) {
+				const s = activeSessions.get(sid)
+				if (s && s.status === "active") {
+					const timedOut = Date.now() - s.lastActivity > IDLE_TIMEOUT_MS
+					const remembered = s.rememberUntil && Date.now() < s.rememberUntil
+					if (!timedOut || remembered) return s
+				}
 			}
-			return s
 		}
+	} catch {}
+	// Fallback: return the most recently active session
+	let latest: Session | undefined
+	for (const s of activeSessions.values()) {
+		if (s.status !== "active") continue
+		const timedOut = Date.now() - s.lastActivity > IDLE_TIMEOUT_MS
+		const remembered = s.rememberUntil && Date.now() < s.rememberUntil
+		if (timedOut && !remembered) {
+			s.status = "expired"
+			continue
+		}
+		if (!latest || s.lastActivity > latest.lastActivity) latest = s
 	}
-	return undefined
+	return latest
 }
 
 export function touchSession(sessionId: string): void {
@@ -117,13 +169,24 @@ export function touchSession(sessionId: string): void {
 }
 
 export function logout(sessionId?: string): void {
-	if (sessionId && activeSessions.has(sessionId)) {
-		const s = activeSessions.get(sessionId)!
+	let sid = sessionId
+	try {
+		if (!sid && typeof window !== "undefined") {
+			sid = window.localStorage.getItem("sfpms_session_id") || undefined
+		}
+	} catch {}
+	if (sid && activeSessions.has(sid)) {
+		const s = activeSessions.get(sid)!
 		s.status = "terminated"
-		activeSessions.delete(sessionId)
+		activeSessions.delete(sid)
 	}
+	try {
+		if (typeof window !== "undefined") {
+			window.localStorage.removeItem("sfpms_session_id")
+		}
+	} catch {}
 }
 
 export function mockCurrentUser(): AuthUser | undefined {
 	return getActiveSession()?.user
-} 
+}

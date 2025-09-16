@@ -87,4 +87,10 @@
   body {
     @apply bg-background text-foreground;
   }
+  .font-sans {
+    font-family: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
+  }
+  .font-mono {
+    font-family: var(--font-geist-mono), ui-monospace, SFMono-Regular, "SF Mono", monospace;
+  }
 }

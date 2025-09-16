@@ -33,6 +33,7 @@ interface Student {
   category: string
   bloodGroup: string
   attendance: number
+  isArchived?: boolean
 }
 
 const mockStudents: Student[] = [
@@ -83,21 +84,25 @@ const mockStudents: Student[] = [
 export function StudentsManagement() {
   const [students, setStudents] = useState<Student[]>(mockStudents)
   const [searchTerm, setSearchTerm] = useState("")
-  const [selectedCourse, setSelectedCourse] = useState<string>("all")
-  const [selectedStatus, setSelectedStatus] = useState<string>("all")
+  const [selectedCourse, setSelectedCourse] = useState<string>("All")
+  const [selectedDepartment, setSelectedDepartment] = useState<string>("All")
+  const [selectedStatus, setSelectedStatus] = useState<string>("All")
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false)
   const [currentStep, setCurrentStep] = useState(1)
   const [newStudent, setNewStudent] = useState<Partial<Student>>({})
 
-  const filteredStudents = students.filter((student) => {
+  const filteredStudents = students.filter((s) => {
     const matchesSearch =
-      student.firstName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      student.lastName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      student.studentId.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      student.email.toLowerCase().includes(searchTerm.toLowerCase())
-    const matchesCourse = selectedCourse === "all" || student.course === selectedCourse
-    const matchesStatus = selectedStatus === "all" || student.status === selectedStatus
-    return matchesSearch && matchesCourse && matchesStatus
+      s.firstName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      s.lastName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      s.studentId.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      s.registrationNumber.toLowerCase().includes(searchTerm.toLowerCase())
+    const matchesCourse = selectedCourse === "All" || s.course === selectedCourse
+    const matchesDepartment = selectedDepartment === "All" || s.department === selectedDepartment
+    const matchesStatus =
+      selectedStatus === "All" ||
+      (selectedStatus === "Archived" ? s.isArchived === true : s.isArchived !== true)
+    return matchesSearch && matchesCourse && matchesDepartment && matchesStatus
   })
 
   const getStatusColor = (status: string) => {
@@ -526,104 +531,98 @@ export function StudentsManagement() {
 
       {/* Filters */}
       <Card>
-        <CardContent className="p-6">
-          <div className="flex gap-4 items-center">
-            <div className="flex-1">
-              <div className="relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
-                <Input
-                  placeholder="Search students by name, ID, or email..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-10"
-                />
-              </div>
-            </div>
-            <Select value={selectedCourse} onValueChange={setSelectedCourse}>
-              <SelectTrigger className="w-48">
-                <SelectValue placeholder="All Courses" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Courses</SelectItem>
-                <SelectItem value="Computer Science">Computer Science</SelectItem>
-                <SelectItem value="Engineering">Engineering</SelectItem>
-                <SelectItem value="Business">Business</SelectItem>
-                <SelectItem value="Arts & Sciences">Arts & Sciences</SelectItem>
-              </SelectContent>
-            </Select>
-            <Select value={selectedStatus} onValueChange={setSelectedStatus}>
-              <SelectTrigger className="w-32">
-                <SelectValue placeholder="All Status" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Status</SelectItem>
-                <SelectItem value="Active">Active</SelectItem>
-                <SelectItem value="Inactive">Inactive</SelectItem>
-                <SelectItem value="Graduated">Graduated</SelectItem>
-                <SelectItem value="Dropped">Dropped</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Students Table */}
-      <Card>
         <CardHeader>
-          <CardTitle>Students List ({filteredStudents.length})</CardTitle>
+          <CardTitle>Student List ({filteredStudents.length})</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
-            {filteredStudents.map((student) => (
-              <div key={student.id} className="border rounded-lg p-4 hover:bg-gray-50 transition-colors">
+            <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
+              <Input
+                placeholder="Search by name, ID, or registration number..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+              />
+              <Select value={selectedCourse} onValueChange={setSelectedCourse}>
+                <SelectTrigger><SelectValue placeholder="Course" /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="All">All Courses</SelectItem>
+                  <SelectItem value="B.Tech CS">B.Tech CS</SelectItem>
+                  <SelectItem value="BBA">BBA</SelectItem>
+                </SelectContent>
+              </Select>
+              <Select value={selectedDepartment} onValueChange={setSelectedDepartment}>
+                <SelectTrigger><SelectValue placeholder="Department" /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="All">All Departments</SelectItem>
+                  <SelectItem value="Computer Science">Computer Science</SelectItem>
+                  <SelectItem value="Business Administration">Business Administration</SelectItem>
+                </SelectContent>
+              </Select>
+              <Select value={selectedStatus} onValueChange={setSelectedStatus}>
+                <SelectTrigger><SelectValue placeholder="Status" /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="All">All</SelectItem>
+                  <SelectItem value="Active">Active</SelectItem>
+                  <SelectItem value="Archived">Archived</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            {filteredStudents.map((s) => (
+              <div key={s.id} className="border rounded-lg p-4 hover:bg-gray-50 transition-colors">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-4">
                     <Avatar className="w-12 h-12">
-                      <AvatarImage src={student.profilePhoto || "/placeholder.svg"} />
+                      <AvatarImage src={s.profilePhoto || "/placeholder.svg"} />
                       <AvatarFallback className="bg-purple-100 text-purple-600">
-                        {student.firstName[0]}
-                        {student.lastName[0]}
+                        {s.firstName[0]}
+                        {s.lastName[0]}
                       </AvatarFallback>
                     </Avatar>
                     <div>
                       <h3 className="font-semibold text-gray-900">
-                        {student.firstName} {student.lastName}
+                        {s.firstName} {s.lastName}
                       </h3>
                       <div className="flex items-center gap-4 text-sm text-gray-600">
                         <span className="flex items-center gap-1">
                           <GraduationCap className="w-4 h-4" />
-                          {student.studentId}
+                          {s.studentId}
                         </span>
                         <span className="flex items-center gap-1">
                           <Mail className="w-4 h-4" />
-                          {student.email}
+                          {s.email}
                         </span>
                         <span className="flex items-center gap-1">
                           <Phone className="w-4 h-4" />
-                          {student.phone}
+                          {s.phone}
                         </span>
                       </div>
                     </div>
                   </div>
                   <div className="flex items-center gap-4">
                     <div className="text-right">
-                      <p className="text-sm font-medium">{student.course}</p>
-                      <p className="text-xs text-gray-500">Semester {student.semester}</p>
+                      <p className="text-sm font-medium">{s.course}</p>
+                      <p className="text-xs text-gray-500">Semester {s.semester}</p>
                     </div>
                     <div className="text-right">
-                      <p className="text-sm font-medium">CGPA: {student.cgpa}</p>
-                      <p className="text-xs text-gray-500">Attendance: {student.attendance}%</p>
+                      <p className="text-sm font-medium">CGPA: {s.cgpa}</p>
+                      <p className="text-xs text-gray-500">Attendance: {s.attendance}%</p>
                     </div>
-                    <Badge className={getStatusColor(student.status)}>{student.status}</Badge>
+                    <Badge className={getStatusColor(s.status)}>{s.status}</Badge>
+                    {s.isArchived && <Badge className="bg-gray-100 text-gray-800">Archived</Badge>}
                     <div className="flex gap-1">
-                      <Button variant="ghost" size="sm">
-                        <Eye className="w-4 h-4" />
-                      </Button>
-                      <Button variant="ghost" size="sm">
-                        <Edit className="w-4 h-4" />
-                      </Button>
-                      <Button variant="ghost" size="sm" className="text-red-600 hover:text-red-700">
-                        <Trash2 className="w-4 h-4" />
+                      <Button variant="ghost" size="sm"><Eye className="w-4 h-4" /></Button>
+                      <Button variant="ghost" size="sm"><Edit className="w-4 h-4" /></Button>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="text-red-600 hover:text-red-700"
+                        onClick={() =>
+                          setStudents((prev) => prev.map((st) => (st.id === s.id ? { ...st, isArchived: !st.isArchived } : st)))
+                        }
+                        title={s.isArchived ? "Restore" : "Archive"}
+                      >
+                        {s.isArchived ? "Restore" : "Archive"}
                       </Button>
                     </div>
                   </div>

@@ -9,9 +9,11 @@ import { logout } from "@/lib/auth"
 
 interface DashboardHeaderProps {
   onLogout: () => void
+  currentUser?: { username: string }
 }
 
-export function DashboardHeader({ onLogout }: DashboardHeaderProps) {
+export function DashboardHeader({ onLogout, currentUser }: DashboardHeaderProps) {
+  const initials = (currentUser?.username || "AD").slice(0, 2).toUpperCase()
   return (
     <header className="flex h-16 shrink-0 items-center gap-2 border-b px-4">
       <SidebarTrigger className="-ml-1" />
@@ -27,7 +29,7 @@ export function DashboardHeader({ onLogout }: DashboardHeaderProps) {
           <DropdownMenuTrigger asChild>
             <Button variant="ghost" className="relative h-8 w-8 rounded-full">
               <Avatar className="h-8 w-8">
-                <AvatarFallback className="bg-purple-100 text-purple-600">AD</AvatarFallback>
+                <AvatarFallback className="bg-purple-100 text-purple-600">{initials}</AvatarFallback>
               </Avatar>
             </Button>
           </DropdownMenuTrigger>

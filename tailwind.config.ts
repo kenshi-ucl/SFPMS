@@ -1,7 +1,8 @@
 import type { Config } from "tailwindcss";
 
 // all in fixtures is set to tailwind v3 as interims solutions
-
+// TODO: update to tailwind v4
+// TODO: update to tailwind v4
 import tailwindcssAnimate from "tailwindcss-animate";
 
 const config: Config = {

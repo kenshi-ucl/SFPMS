@@ -23,68 +23,84 @@ import {
   FileText,
   User,
   Settings,
+  Bell,
+  ClipboardList,
+  Award,
+  TrendingUp,
 } from "lucide-react"
 
 interface AppSidebarProps {
   activeSection: string
   onSectionChange: (section: string) => void
+  currentUser?: { username: string; role: string }
 }
 
-export function AppSidebar({ activeSection, onSectionChange }: AppSidebarProps) {
-  const navigationItems = [
-    {
-      title: "Dashboard",
-      icon: LayoutDashboard,
-      id: "dashboard",
-    },
-    {
-      title: "Users",
-      icon: Users,
-      id: "users",
-    },
-    {
-      title: "Courses",
-      icon: BookOpen,
-      id: "courses",
-    },
-    {
-      title: "Students",
-      icon: GraduationCap,
-      id: "students",
-    },
-    {
-      title: "Faculty",
-      icon: UserCheck,
-      id: "faculty",
-    },
-    {
-      title: "Departments",
-      icon: Building2,
-      id: "departments",
-    },
-    {
-      title: "Academic Years",
-      icon: Calendar,
-      id: "academic-years",
-    },
-    {
-      title: "Audit Log",
-      icon: FileText,
-      id: "audit-log",
-    },
+export function AppSidebar({ activeSection, onSectionChange, currentUser }: AppSidebarProps) {
+  const role = currentUser?.role || "admin"
+
+  // Admin: Full system access
+  const adminNav = [
+    { title: "Dashboard", icon: LayoutDashboard, id: "dashboard" },
+    { title: "Users", icon: Users, id: "users" },
+    { title: "Faculty Management", icon: UserCheck, id: "faculty" },
+    { title: "Student Management", icon: GraduationCap, id: "students" },
+    { title: "Enrollment Management", icon: ClipboardList, id: "enrollment-management" },
+    { title: "Courses", icon: BookOpen, id: "courses" },
+    { title: "Departments", icon: Building2, id: "departments" },
+    { title: "Academic Years", icon: Calendar, id: "academic-years" },
+    { title: "Reports", icon: FileText, id: "reports" },
+    { title: "Notifications", icon: Bell, id: "notifications" },
+    { title: "Audit Log", icon: FileText, id: "audit-log" },
   ]
 
+  // Department Admin: Department-level access
+  const deptAdminNav = [
+    { title: "Dashboard", icon: LayoutDashboard, id: "dashboard" },
+    { title: "Faculty Management", icon: UserCheck, id: "faculty" },
+    { title: "Student Management", icon: GraduationCap, id: "students" },
+    { title: "Application Review", icon: ClipboardList, id: "student-enrollment" },
+    { title: "Courses", icon: BookOpen, id: "courses" },
+    { title: "Departments", icon: Building2, id: "departments" },
+    { title: "Academic Years", icon: Calendar, id: "academic-years" },
+    { title: "Reports", icon: FileText, id: "reports" },
+    { title: "Notifications", icon: Bell, id: "notifications" },
+  ]
+
+  // Faculty: Student monitoring for their courses
+  const facultyNav = [
+    { title: "Dashboard", icon: LayoutDashboard, id: "dashboard" },
+    { title: "My Students", icon: GraduationCap, id: "my-students" },
+    { title: "My Courses", icon: BookOpen, id: "my-courses" },
+    { title: "Class Schedule", icon: Calendar, id: "class-schedule" },
+    { title: "Student Grades", icon: Award, id: "student-grades" },
+    { title: "Attendance", icon: ClipboardList, id: "attendance" },
+    { title: "Course Reports", icon: FileText, id: "course-reports" },
+    { title: "Notifications", icon: Bell, id: "notifications" },
+  ]
+
+  // Student: Personal academic information only
+  const studentNav = [
+    { title: "Dashboard", icon: LayoutDashboard, id: "dashboard" },
+    { title: "My Grades", icon: Award, id: "my-grades" },
+    { title: "Class Schedule", icon: Calendar, id: "class-schedule" },
+    { title: "My Courses", icon: BookOpen, id: "my-courses" },
+    { title: "Attendance", icon: ClipboardList, id: "my-attendance" },
+    { title: "Academic Progress", icon: TrendingUp, id: "academic-progress" },
+    { title: "Notifications", icon: Bell, id: "notifications" },
+  ]
+
+  const navigationItems =
+    role === "admin"
+      ? adminNav
+      : role === "dept_admin"
+      ? deptAdminNav
+      : role === "faculty"
+      ? facultyNav
+      : studentNav
+
   const accountItems = [
-    {
-      title: "My Profile",
-      icon: User,
-      id: "profile",
-    },
-    {
-      title: "Settings",
-      icon: Settings,
-      id: "settings",
-    },
+    { title: "My Profile", icon: User, id: "profile" },
+    { title: "Settings", icon: Settings, id: "settings" },
   ]
 
   return (
@@ -134,7 +150,7 @@ export function AppSidebar({ activeSection, onSectionChange }: AppSidebarProps) 
       </SidebarContent>
       <SidebarFooter>
         <div className="px-4 py-2 text-xs text-gray-500">
-          <div>Logged in as: Administrator</div>
+          <div>Logged in as: {currentUser ? currentUser.username : "guest"} ({role})</div>
           <div>Academic Year: 2024-2025</div>
         </div>
       </SidebarFooter>
