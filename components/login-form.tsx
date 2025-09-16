@@ -1,72 +1,47 @@
 "use client"
 
 import type React from "react"
-
 import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { GraduationCap, Eye, EyeOff } from "lucide-react"
-import { login, validatePasswordPolicy, verifyMfa } from "@/lib/auth"
+import { GraduationCap, Eye, EyeOff, AlertCircle } from "lucide-react"
+import { useAuth } from "@/lib/auth-context"
 
 interface LoginFormProps {
-  onLogin: () => void
+  onLogin?: () => void
 }
 
 export function LoginForm({ onLogin }: LoginFormProps) {
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
   const [showPassword, setShowPassword] = useState(false)
-  const [isLoading, setIsLoading] = useState(false)
-  const [remember, setRemember] = useState(true)
-
-  const [mfaId, setMfaId] = useState<string | null>(null)
-  const [mfaCode, setMfaCode] = useState("")
   const [error, setError] = useState<string | null>(null)
+  
+  const { login, isLoading } = useAuth()
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    setIsLoading(true)
     setError(null)
 
-    const policy = validatePasswordPolicy(password)
-    if (!policy.ok) {
-      // We still allow demo login even if policy fails; show warning only
-      // setError(policy.reason)
-    }
-
-    const res = await login(email, password, { remember, mfaType: "email" })
-    if (res.error) {
-      setError(res.error)
-      setIsLoading(false)
-      return
-    }
-    if (res.challenge) {
-      setMfaId(res.challenge.mfaId)
-      setIsLoading(false)
+    if (!email.trim()) {
+      setError("Email is required")
       return
     }
 
-    setIsLoading(false)
-    onLogin()
-  }
-
-  const handleVerifyMfa = async (e: React.FormEvent) => {
-    e.preventDefault()
-    if (!mfaId) return
-    setIsLoading(true)
-    setError(null)
-
-    const out = await verifyMfa(mfaId, mfaCode, { remember })
-    if (out.error) {
-      setError(out.error)
-      setIsLoading(false)
+    if (!password.trim()) {
+      setError("Password is required")
       return
     }
 
-    setIsLoading(false)
-    onLogin()
+    try {
+      await login({ email, password })
+      onLogin?.()
+    } catch (error: any) {
+      setError(error.message || "Login failed. Please check your credentials.")
+    }
+
   }
 
   return (
@@ -82,80 +57,72 @@ export function LoginForm({ onLogin }: LoginFormProps) {
           <CardDescription>Student & Faculty Profile Management System</CardDescription>
         </CardHeader>
         <CardContent>
-          {!mfaId ? (
-            <form onSubmit={handleSubmit} className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="email">Email</Label>
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="email">Email</Label>
+              <Input
+                id="email"
+                type="email"
+                placeholder="Enter your email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+                disabled={isLoading}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="password">Password</Label>
+              <div className="relative">
                 <Input
-                  id="email"
-                  type="email"
-                  placeholder="Enter your email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
+                  id="password"
+                  type={showPassword ? "text" : "password"}
+                  placeholder="Enter your password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
                   required
+                  disabled={isLoading}
                 />
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
+                  onClick={() => setShowPassword(!showPassword)}
+                  disabled={isLoading}
+                >
+                  {showPassword ? (
+                    <EyeOff className="h-4 w-4 text-gray-400" />
+                  ) : (
+                    <Eye className="h-4 w-4 text-gray-400" />
+                  )}
+                </Button>
               </div>
-              <div className="space-y-2">
-                <Label htmlFor="password">Password</Label>
-                <div className="relative">
-                  <Input
-                    id="password"
-                    type={showPassword ? "text" : "password"}
-                    placeholder="Enter your password"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    required
-                  />
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="sm"
-                    className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
-                    onClick={() => setShowPassword(!showPassword)}
-                  >
-                    {showPassword ? (
-                      <EyeOff className="h-4 w-4 text-gray-400" />
-                    ) : (
-                      <Eye className="h-4 w-4 text-gray-400" />
-                    )}
-                  </Button>
-                </div>
+            </div>
+            
+            {error && (
+              <div className="flex items-center gap-2 text-sm text-red-600 bg-red-50 p-3 rounded-md">
+                <AlertCircle className="h-4 w-4" />
+                {error}
               </div>
-              <label className="flex items-center gap-2 text-sm">
-                <input type="checkbox" checked={remember} onChange={(e) => setRemember(e.target.checked)} />
-                Remember me (30 days)
-              </label>
-              {error && <div className="text-sm text-red-600">{error}</div>}
-              <Button type="submit" className="w-full bg-purple-600 hover:bg-purple-700" disabled={isLoading}>
-                {isLoading ? "Signing in..." : "Sign In"}
-              </Button>
-              <div className="mt-2 text-center text-xs text-gray-600">
-                Demo accounts:<br />
-                Admin: admin@university.edu / Password!2345<br />
-                Dept Admin: deptadmin@university.edu / Password!2345<br />
-                Faculty: faculty@university.edu / Password!2345<br />
-                Student: student@university.edu / Password!2345
+            )}
+            
+            <Button 
+              type="submit" 
+              className="w-full bg-purple-600 hover:bg-purple-700" 
+              disabled={isLoading}
+            >
+              {isLoading ? "Signing in..." : "Sign In"}
+            </Button>
+            
+            <div className="mt-4 text-center text-xs text-gray-600 bg-gray-50 p-3 rounded-md">
+              <div className="font-semibold mb-2">Demo accounts:</div>
+              <div className="space-y-1">
+                <div><strong>Admin:</strong> admin@sfpms.edu / admin123</div>
+                <div><strong>Faculty:</strong> john.smith@sfpms.edu / faculty123</div>
+                <div><strong>Student:</strong> alice.williams@student.sfpms.edu / student123</div>
               </div>
-            </form>
-          ) : (
-            <form onSubmit={handleVerifyMfa} className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="mfa">Enter verification code</Label>
-                <Input
-                  id="mfa"
-                  inputMode="numeric"
-                  placeholder="6-digit code"
-                  value={mfaCode}
-                  onChange={(e) => setMfaCode(e.target.value)}
-                  required
-                />
-              </div>
-              {error && <div className="text-sm text-red-600">{error}</div>}
-              <Button type="submit" className="w-full bg-purple-600 hover:bg-purple-700" disabled={isLoading}>
-                {isLoading ? "Verifying..." : "Verify & Continue"}
-              </Button>
-            </form>
-          )}
+            </div>
+          </form>
         </CardContent>
       </Card>
     </div>
