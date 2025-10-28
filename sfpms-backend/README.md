@@ -7,6 +7,73 @@
 <a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
 </p>
 
+# SFPMS - Student & Faculty Profile Management System
+
+## Quick Start
+
+### Complete Setup (Backend + Frontend)
+
+```bash
+# Install PHP dependencies
+composer install
+
+# Install Node.js dependencies
+npm install
+
+# Setup environment
+cp .env.example .env
+php artisan key:generate
+php artisan jwt:secret
+
+# Run migrations and seeders
+php artisan migrate
+php artisan db:seed
+
+# Compile frontend assets
+npm run dev
+
+# Start server
+php artisan serve
+```
+
+Access the application at `http://localhost:8000`
+
+### Test Accounts
+- **Admin**: admin@sfpms.edu / admin123
+- **Faculty**: john.smith@sfpms.edu / faculty123
+- **Student**: alice.williams@student.sfpms.edu / student123
+
+## Documentation
+
+- **Backend Setup**: See `BACKEND_SETUP.md`
+- **Frontend Setup**: See `FRONTEND_SETUP.md` or `README_FRONTEND.md`
+
+## Technology Stack
+
+### Backend
+- Laravel 11
+- PHP 8.2+
+- MySQL/SQLite
+- JWT Authentication
+- RESTful API
+
+### Frontend
+- React 18 (JavaScript)
+- Laravel Mix 6
+- Tailwind CSS 3
+- Radix UI Components
+- Recharts for data visualization
+
+## Development
+
+```bash
+# Watch frontend assets (auto-compile on changes)
+npm run watch
+
+# In another terminal, start Laravel server
+php artisan serve
+```
+
 ## About Laravel
 
 Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:

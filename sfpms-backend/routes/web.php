@@ -2,6 +2,7 @@
 
 use Illuminate\Support\Facades\Route;
 
-Route::get('/', function () {
-    return view('welcome');
-});
+// Main application route - serves React SPA
+Route::get('/{any}', function () {
+    return view('app');
+})->where('any', '.*');

@@ -21,8 +21,7 @@ class UserController extends Controller
      */
     public function __construct()
     {
-        $this->middleware('auth:api');
-        $this->middleware('admin')->except(['show', 'update']);
+        // Middleware is now handled in routes/api.php
     }
 
     /**
@@ -33,7 +32,20 @@ class UserController extends Controller
      */
     public function index(Request $request)
     {
+        $currentUser = JWTAuth::parseToken()->authenticate();
         $query = User::query();
+
+        // Apply department filtering for department admins
+        if ($currentUser->isDepartmentAdmin()) {
+            // Department admins can only see users in their department
+            $query->where('department_id', $currentUser->department_id);
+            
+            // Department admins cannot see other admins
+            $query->where('role', '!=', User::ROLE_ADMIN);
+        } elseif ($currentUser->isSuperAdmin()) {
+            // Super admins can see all users
+            // No additional filtering needed
+        }
 
         // Filter by role if provided
         if ($request->has('role') && $request->role) {
@@ -57,7 +69,7 @@ class UserController extends Controller
         }
 
         $perPage = $request->get('per_page', 15);
-        $users = $query->latest()->paginate($perPage);
+        $users = $query->with('department')->latest()->paginate($perPage);
 
         return new UserCollection($users);
     }
@@ -70,12 +82,39 @@ class UserController extends Controller
      */
     public function store(RegisterRequest $request)
     {
+        $currentUser = JWTAuth::parseToken()->authenticate();
 
-        // Validate role-specific fields
-        if ($request->role === 'faculty' && !$request->employee_id) {
+        // Only super admins can create admin users
+        if ($request->role === 'admin' && !$currentUser->isSuperAdmin()) {
             return response()->json([
                 'success' => false,
-                'message' => 'Employee ID is required for faculty members'
+                'message' => 'Only super administrators can create admin users'
+            ], 403);
+        }
+
+        // Department admins can only create users in their own department
+        if ($currentUser->isDepartmentAdmin()) {
+            if ($request->role === 'admin') {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Department administrators cannot create admin users'
+                ], 403);
+            }
+            
+            // Force department assignment for department admins
+            if ($request->department_id != $currentUser->department_id) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'You can only create users in your own department'
+                ], 403);
+            }
+        }
+
+        // Validate role-specific fields
+        if ($request->role !== 'student' && !$request->employee_id) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Employee ID is required for admin and faculty roles'
             ], 400);
         }
 
@@ -83,6 +122,20 @@ class UserController extends Controller
             return response()->json([
                 'success' => false,
                 'message' => 'Student ID is required for students'
+            ], 400);
+        }
+
+        if ($request->role === 'faculty' && !$request->department_id) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Department selection is required for faculty members'
+            ], 400);
+        }
+
+        if ($request->role === 'admin' && !$request->department_id) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Department selection is required for department administrators'
             ], 400);
         }
 
