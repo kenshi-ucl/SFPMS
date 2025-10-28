@@ -3,6 +3,10 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\UserController;
+use App\Http\Controllers\DepartmentController;
+use App\Http\Controllers\CourseController;
+use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\ProfileController;
 
 /*
 |--------------------------------------------------------------------------
@@ -30,6 +34,16 @@ Route::middleware('jwt.auth')->group(function () {
         Route::post('refresh', [AuthController::class, 'refresh']);
     });
 
+    // Dashboard routes
+    Route::prefix('dashboard')->group(function () {
+        Route::get('/', [DashboardController::class, 'index']);
+        Route::get('statistics', [DashboardController::class, 'getStatistics']);
+        Route::get('enrollment-trends', [DashboardController::class, 'getEnrollmentTrends']);
+        Route::get('student-distribution', [DashboardController::class, 'getStudentDistribution']);
+        Route::get('department-statistics', [DashboardController::class, 'getDepartmentStatistics']);
+        Route::get('recent-activities', [DashboardController::class, 'getRecentActivities']);
+    });
+
     // User management routes
     Route::prefix('users')->group(function () {
         // Routes accessible to all authenticated users
@@ -45,6 +59,56 @@ Route::middleware('jwt.auth')->group(function () {
             
             // Get users by role
             Route::get('role/{role}', [UserController::class, 'getUsersByRole']);
+        });
+    });
+
+    // Department management routes
+    Route::prefix('departments')->group(function () {
+        // Routes accessible to all authenticated users (for department selection)
+        Route::get('/', [DepartmentController::class, 'index']);
+        Route::get('{id}', [DepartmentController::class, 'show']);
+        
+        // Admin-only routes
+        Route::middleware('admin')->group(function () {
+            Route::post('/', [DepartmentController::class, 'store']);
+            Route::put('{id}', [DepartmentController::class, 'update']);
+            Route::delete('{id}', [DepartmentController::class, 'destroy']);
+        });
+    });
+
+    // Course management routes
+    Route::prefix('courses')->group(function () {
+        // Routes accessible to all authenticated users (for course selection)
+        Route::get('/', [CourseController::class, 'index']);
+        Route::get('department/{id}', [CourseController::class, 'getCoursesByDepartment']);
+        Route::get('{id}', [CourseController::class, 'show']);
+        
+        // Admin-only routes
+        Route::middleware('admin')->group(function () {
+            Route::post('/', [CourseController::class, 'store']);
+            Route::put('{id}', [CourseController::class, 'update']);
+            Route::delete('{id}', [CourseController::class, 'destroy']);
+        });
+    });
+
+    // Profile management routes
+    Route::prefix('profiles')->group(function () {
+        // Routes accessible to all authenticated users
+        Route::get('user/{userId}', [ProfileController::class, 'getByUserId']);
+        Route::get('statistics', [ProfileController::class, 'statistics']);
+        
+        // Student can manage their own profile
+        Route::post('/', [ProfileController::class, 'store']);
+        Route::put('{id}', [ProfileController::class, 'update']);
+        Route::post('{id}/submit', [ProfileController::class, 'submit']);
+        
+        // Admin routes
+        Route::middleware('admin')->group(function () {
+            Route::get('/', [ProfileController::class, 'index']);
+            Route::get('{id}', [ProfileController::class, 'show']);
+            Route::post('{id}/approve', [ProfileController::class, 'approve']);
+            Route::post('{id}/reject', [ProfileController::class, 'reject']);
+            Route::delete('{id}', [ProfileController::class, 'destroy']);
         });
     });
 });

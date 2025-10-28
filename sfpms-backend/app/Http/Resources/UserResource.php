@@ -26,6 +26,13 @@ class UserResource extends JsonResource
             'address' => $this->address,
             'date_of_birth' => $this->date_of_birth?->format('Y-m-d'),
             'department_id' => $this->department_id,
+            'department' => $this->whenLoaded('department', function () {
+                return [
+                    'id' => $this->department->id,
+                    'name' => $this->department->name,
+                    'code' => $this->department->code,
+                ];
+            }),
             'joined_at' => $this->joined_at?->format('Y-m-d H:i:s'),
             'email_verified_at' => $this->email_verified_at?->format('Y-m-d H:i:s'),
             'created_at' => $this->created_at->format('Y-m-d H:i:s'),

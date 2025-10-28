@@ -89,13 +89,33 @@ class User extends Authenticatable implements JWTSubject
     }
 
     /**
-     * Check if user is admin
+     * Check if user is admin (any type)
      *
      * @return bool
      */
     public function isAdmin(): bool
     {
         return $this->role === self::ROLE_ADMIN;
+    }
+
+    /**
+     * Check if user is super admin
+     *
+     * @return bool
+     */
+    public function isSuperAdmin(): bool
+    {
+        return $this->role === self::ROLE_ADMIN && is_null($this->department_id);
+    }
+
+    /**
+     * Check if user is department admin
+     *
+     * @return bool
+     */
+    public function isDepartmentAdmin(): bool
+    {
+        return $this->role === self::ROLE_ADMIN && !is_null($this->department_id);
     }
 
     /**
@@ -149,5 +169,21 @@ class User extends Authenticatable implements JWTSubject
     public function scopeActive($query)
     {
         return $query->where('status', self::STATUS_ACTIVE);
+    }
+
+    /**
+     * Get the department that the user belongs to.
+     */
+    public function department()
+    {
+        return $this->belongsTo(Department::class);
+    }
+
+    /**
+     * Get the student profile for this user.
+     */
+    public function studentProfile()
+    {
+        return $this->hasOne(StudentProfile::class);
     }
 }
